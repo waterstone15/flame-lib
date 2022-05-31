@@ -1,7 +1,7 @@
 {
-  "name": "flame",
+  "name": "flame-lib",
   "version": "0.0.1",
-  "description": "A practical data model and query library for Firestore.",
+  "description": "A data model and query library for Firestore.",
   "main": "index.js",
   "repository": "git@github.com:waterstone15/flame-orm.git",
   "author": "Brian Waterstone <code@waterstone15.com>",

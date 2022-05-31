@@ -1,5 +1,5 @@
-# Flame
-A practical data model and query library for Firestore.
+# Flame Library
+A data model and query library for Firestore.
 
 1. [Set Up](#set-up)
 2. [Ignite](#ignite)
@@ -19,7 +19,7 @@ A practical data model and query library for Firestore.
 
 ### Set Up
 ```coffeescript
-flame = require 'flame-orm'
+flame = require 'flame-lib'
 
 flame.setup()
 
@@ -31,7 +31,7 @@ flame.setup({
 
 ### Ignite
 ```coffeescript
-flame = require 'flame-orm'
+flame = require 'flame-lib'
 
 Flame = await flame.ignite()
 # => Flame instance using 'default' firestore app
