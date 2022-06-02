@@ -31,7 +31,6 @@
 flame = require 'flame-lib'
 
 flame.setup()
-# Not needed for Mutambo
 # For use with firebase functions (auto load) with no credeitnal, and no name.
 
 # flame itself should be a singleton. if it is required over and over in the same process (web server), each flame = require 'flame-lib' should return the same object.
