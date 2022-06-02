@@ -1,13 +1,14 @@
+<br>
 <p align="center">
   <img width="270" height="122" src="/img/flame.png">
 </p>
-
-
 <p align="center">
   A data model and query library for Firestore.
 </>
-  
-<hr style='height: 2px;'/>
+<br>
+<br>
+<hr style='height: 1px;'/>
+<br>
 
 1. [Set Up](#set-up)
 2. [Ignite](#ignite)
