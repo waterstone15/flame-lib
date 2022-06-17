@@ -1,5 +1,6 @@
 const Fb = require("./firebase");
 const FlameError = require("./errors");
+const Shape = require("./model");
 
 
 /*
@@ -7,16 +8,18 @@ const FlameError = require("./errors");
  * Instances of this are to be managed only via the FlameRegistry.
  */
 class Flame {
+  #fbApp = null;
+
   constructor(fbApp) {
-    this.fbApp = fbApp;
+    this.#fbApp = fbApp;
   }
 
   async quench() {
-    await this.fbApp.delete();
+    await this.#fbApp.delete();
   }
 
-  extend(spec) {
-    throw new FlameError(`Not implemented!`);
+  shape(spec) {
+    return Shape.fromSpec(spec);
   }
 
   write(...writables) {
