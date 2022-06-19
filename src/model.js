@@ -74,10 +74,11 @@ class Shape {
   /*
    * Create an instance of this Shape, with the given values.
    */
-  spark(_given) {
-    // TODO: currently only populates using the defaults and the '_given' values are ignored.
-    const o = {meta: {}, var: {}, ref: {}, ext: {}};
+  spark(from) {
+    // Initialize the object 'o' to be constructed and returned:
+    const o = {meta: {}, val: {}, ref: {}, ext: {}};
 
+    // Init 'o' with the defaults:
     const initField = (s, k, dfault) => s[k] = k in s ? s[k] : dfault();
     const init = (s, spec) => Object.keys(spec).forEach((k) => initField(s, k, spec[k].default));
     init(o.meta, this.#meta);
@@ -85,6 +86,23 @@ class Shape {
     init(o.ref, this.#ref);
     init(o.ext, this.#ext);
 
+    // Verify 'from' is a subset of the specs:
+    const matches = (sectionName, o, from) => Object.keys(from[sectionName]).forEach((k) => {
+      if (!(k in o[sectionName])) throw new FlameError(`Unexpected key '${sectionName}.${k}'`);
+    });
+    if ("meta" in from) matches("meta", o, from);
+    if ("val" in from) matches("val", o, from);
+    if ("rel" in from) matches("rel", o, from);
+    if ("ext" in from) matches("ext", o, from);
+
+    // Override the defaults with the explicitly given values:
+    const set = (s, from) => Object.keys(from).forEach((k) => s[k] = from[k]);
+    if ("meta" in from) set(o.meta, from.meta);
+    if ("val" in from) set(o.val, from.val);
+    if ("ref" in from) set(o.ref, from.ref);
+    if ("ext" in from) set(o.ext, from.ext);
+
+    // Define 'o.ok()':
     const okSection = (s, spec) => Object.keys(s).every((k) => spec[k].ok(s[k]));
     const okAll = (o) => okSection(o.meta, this.#meta) &&
       okSection(o.val, this.#val) &&
