@@ -13,9 +13,9 @@
 1. [Ignite](#ignite)
 2. [Hold](#hold)
 3. [Quench](#quench)
-4. [Models](#models)
-5. [Create](#create)
-6. [Validate](#validate)
+4. [Shape (i.e. define model)](#shape)
+5. [Spark (i.e. instantiate model)](#spark)
+6. [Ok (i.e. validate)](#ok)
 7. [Save](#save)
 8. [Update](#update)
 9. [Upsert](#upsert)
@@ -67,15 +67,13 @@ await flame.quench('other');
 // => releases resources for previously ignited Flame using 'other' firestore app.
 ```
 
-### Models
+### Shape
 ```javascript
-Person = Flame.extend({
-  fields:
-    val:
-      name: null
-  ok:
-    val:
-      name: (v) -> isNull(v) || (!isEmpty(v) && isString(v))
+Person = Flame.shape({
+  val: {
+    name: null,
+    ok: (v) => isNull(v) || (!isEmpty(v) && isString(v)),
+  },
 });
 // Person is now an extended Flame object with more fields and matching validators.
 // Child = Person.extend({}) should work as well (for arbritrary model extension)
@@ -84,16 +82,16 @@ Person = Flame.extend({
 // a validator (a corresponding ok.<field path> is required for every field
 ```
 
-### Create
+### Spark
 ```javascript
-john = Person.create({
+john = Person.spark({
   val:
     name: 'John Doe'
 });
 // once john is created, the field values cannot be modified. create returns an instance with imutable fields. This forces some better coding habbits (on my part) and helps me reason about what *is* going into the database.
 ```
 
-### Validate
+### Ok
 ```javascript
 john.ok();
 // runs the validator for each field.
