@@ -7,16 +7,15 @@ const base64 = require("@stablelib/base64");
  * Internal-only to Flame; not intended to be used directly by Flame's clients.
  */
 class FirebaseApp {
-  static async create(config) {
-    const fbCfg = FirebaseApp.#firebaseConfig(config);
+  static async create(config, dbURL, certificate) {
+    const fbCfg = FirebaseApp.#firebaseConfig(config, dbURL, certificate);
     return await fba.initializeApp(fbCfg);
   }
 
-  static #firebaseConfig(config) {
-    const cert = JSON.parse(Buffer.from(process.env.FIREBASE_CONFIG_BASE64, 'base64').toString());
+  static #firebaseConfig(config, dbURL, certificate) {
     return {
-      credential: fba.credential.cert(cert),
-      databaseURL: process.env.FIREBASE_DATABASE_URL,
+      credential: fba.credential.cert(certificate),
+      databaseURL: dbURL,
       ...config,
     };
   }

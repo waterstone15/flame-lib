@@ -2,11 +2,15 @@ const Flame = require("../src/flame");
 const FlameError = require("../src/errors");
 
 
+const cert = JSON.parse(Buffer.from(process.env.FIREBASE_CONFIG_BASE64, 'base64').toString());
+const dbURL = process.env.FIREBASE_DATABASE_URL;
+
+
 describe("Flame", () => {
   flame = null;
 
   beforeAll(async () => {
-    flame = await Flame.ignite("F1", {});
+    flame = await Flame.ignite("F1", {}, dbURL, cert);
   })
 
   it("creates basic Shape", async () => {
@@ -68,7 +72,7 @@ describe("Shape", () => {
   shape = null;
 
   beforeAll(async () => {
-    flame = await Flame.ignite("F2", {});
+    flame = await Flame.ignite("F2", {}, dbURL, cert);
     shape = flame.shape("sh4pe", {
       val: { name: "doe" },
       ok: {
@@ -167,7 +171,7 @@ describe("Spark", () => {
   shape = null;
 
   beforeAll(async () => {
-    flame = await Flame.ignite("F3", {});
+    flame = await Flame.ignite("F3", {}, dbURL, cert);
     shape = flame.shape("sh4pe", {
       val: { name: null },
       ok: {

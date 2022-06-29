@@ -33,7 +33,7 @@ class Flame {
 class FlameRegistry {
   static #instances = {};
 
-  static async ignite(name, config) {
+  static async ignite(name, config, dbURL, certificate) {
     if (name in FlameRegistry.#instances) {
       throw new FlameError(`Flame already exists for name '${name}'`);
     }
