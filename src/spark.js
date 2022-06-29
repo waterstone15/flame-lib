@@ -5,26 +5,32 @@ const FlameError = require("./errors");
  * A Flame Shape Instance.
  */
 class Spark {
+  static perSection(callback) {
+    callback("meta");
+    callback("val");
+    callback("ref");
+    callback("ext");
+  }
+
   shape = null;
   meta = null;
   val = null;
   ref = null;
   ext = null;
 
-  constructor(shape, meta, val, ref, ext) {
+  constructor(shape, values) {
     this.shape = shape;
-    this.meta = meta;
-    this.val = val;
-    this.ref = ref;
-    this.ext = ext;
+    Spark.perSection((section) => this[section] = values[section]);
   }
 
   ok() {
-    const okSection = (s, ok) => Object.keys(s).every((k) => ok[k](s[k]));
-    return okSection(this.meta, this.shape.ok.meta) &&
-      okSection(this.val, this.shape.ok.val) &&
-      okSection(this.ref, this.shape.ok.ref) &&
-      okSection(this.ext, this.shape.ok.ext);
+    const okSection = (section) => {
+      const s = this[section];
+      return Object.keys(s).every((k) => this.shape.ok(section, k)(s[k]));
+    };
+    var ret = true;
+    Spark.perSection((section) => ret &&= okSection(section));
+    return ret;
   }
 
   save() {
