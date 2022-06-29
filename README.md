@@ -31,7 +31,11 @@
 ```javascript
 flame = require('flame-lib');
 
-Flame = await flame.ignite();
+const cert = JSON.parse(Buffer.from(process.env.FIREBASE_CONFIG_BASE64, 'base64').toString());
+const dbURL = process.env.FIREBASE_DATABASE_URL;
+
+
+Flame = await flame.ignite('main', {}, dbURL, certificate);
 // For use with firebase functions (auto load) with no credential, and no name.
 
 // flame itself should be a singleton. if it is required over and over in the same process (web server), each flame = require 'flame-lib' should return the same object.
