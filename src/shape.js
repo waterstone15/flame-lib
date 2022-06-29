@@ -1,30 +1,30 @@
 const uuid = require("uuid");
 
+const Spark = require("./spark");
 const FlameError = require("./errors");
 
 
 class Shape {
   static base = Shape.#base();
   #type = null;
-  #meta = null;
-  #val = null;
-  #ref = null;
-  #ext = null;
-  #ok = null;
+  #defaults = null;
+  ok = null;
 
   constructor(type, meta, val, ref, ext, ok) {
     this.#type = type;
-    this.#meta = meta;
-    this.#val = val;
-    this.#ref = ref;
-    this.#ext = ext;
-    this.#ok = ok;
+    this.#defaults = {
+      meta: meta,
+      val: val,
+      ref: ref,
+      ext: ext,
+    };
+    this.ok = ok;
 
-    this.#meta.type = () => this.#type;
-    this.#meta.id = () => `${this.#type}:${uuid.v4()}`;
+    this.#defaults.meta.type = () => this.#type;
+    this.#defaults.meta.id = () => `${this.#type}:${uuid.v4()}`;
 
-    this.#ok.meta.type = (v) => typeof v === "string" && v.length > 0;
-    this.#ok.meta.id = (v) => typeof v === "string" && v.length > 0;
+    this.ok.meta.type = (v) => typeof v === "string" && v.length > 0;
+    this.ok.meta.id = (v) => typeof v === "string" && v.length > 0;
   }
 
   static #base() {
@@ -34,12 +34,12 @@ class Shape {
       {}, // val
       {}, // ref
       {}, // ext
-      {
+      { // ok
         meta: {},
         val: {},
         ref: {},
         ext: {},
-      }, // ok
+      },
     );
   }
 
@@ -93,57 +93,24 @@ class Shape {
    * Create an instance of this Shape, with the given values.
    */
   spark(from) {
-    // Initialize the object 'o' to be constructed and returned:
-    const o = {meta: {}, val: {}, ref: {}, ext: {}, ok: {}};
-
-    // Init 'o' with the defaults:
-    const init = (s, spec) => Object.keys(spec).forEach((k) => s[k] = spec[k]());
-    init(o.meta, this.#meta);
-    init(o.val, this.#val);
-    init(o.ref, this.#ref);
-    init(o.ext, this.#ext);
-
     // Verify 'from' is a subset of the specs:
-    const matches = (sectionName) => Object.keys(from[sectionName] ?? {}).forEach((k) => {
-      if (!(k in o[sectionName])) throw new FlameError(`Unexpected key '${sectionName}.${k}'`);
+    const matches = (section) => Object.keys(from[section] ?? {}).forEach((k) => {
+      if (!(k in this.#defaults[section])) throw new FlameError(`Unexpected key '${section}.${k}'`);
     });
     matches("meta");
     matches("val");
-    matches("rel");
+    matches("ref");
     matches("ext");
 
-    // Override the defaults with the explicitly given values:
-    const set = (s, from) => Object.keys(from).forEach((k) => s[k] = from[k]);
-    set(o.meta, from.meta ?? {});
-    set(o.val, from.val ?? {});
-    set(o.ref, from.ref ?? {});
-    set(o.ext, from.ext ?? {});
-
-    // Define 'o.ok()':
-    const okSection = (s, spec) => Object.keys(s).every((k) => spec[k](s[k]));
-    const okAll = (o) => okSection(o.meta, this.#ok.meta) &&
-      okSection(o.val, this.#ok.val) &&
-      okSection(o.ref, this.#ok.ref) &&
-      okSection(o.ext, this.#ok.ext);
-    o.ok = () => okAll(o);
-
-    o.save = () => {
-      throw new FlameError(`Not implemented!`);
-    };
-
-    o.update = () => {
-      throw new FlameError(`Not implemented!`);
-    };
-
-    o.upsert = () => {
-      throw new FlameError(`Not implemented!`);
-    };
-
-    o.remove = () => {
-      throw new FlameError(`Not implemented!`);
-    };
-
-    return o;
+    // Initialize all fields:
+    const init = (section) => {
+      const defaults = this.#defaults[section];
+      const given = from[section] ?? {};
+      const s = {};
+      Object.keys(defaults).forEach((k) => s[k] = k in given ? given[k] : defaults[k]());
+      return s;
+    }
+    return new Spark(this, init("meta"), init("val"), init("ref"), init("ext"));
   }
 
   get(id) {

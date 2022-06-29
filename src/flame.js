@@ -1,6 +1,6 @@
 const Fb = require("./firebase");
 const FlameError = require("./errors");
-const Shape = require("./model");
+const Shape = require("./shape");
 
 
 /*
