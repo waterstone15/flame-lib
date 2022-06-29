@@ -69,10 +69,14 @@ await flame.quench('other');
 
 ### Shape
 ```javascript
-Person = Flame.shape({
+Person = Flame.shape("Person", {
   val: {
     name: null,
-    ok: (v) => isNull(v) || (!isEmpty(v) && isString(v)),
+  },
+  ok: {
+    val: {
+      name: (v) => !isEmpty(v) && isString(v),
+    },
   },
 });
 // Person is now an extended Flame object with more fields and matching validators.
@@ -85,8 +89,9 @@ Person = Flame.shape({
 ### Spark
 ```javascript
 john = Person.spark({
-  val:
-    name: 'John Doe'
+  val: {
+    name: 'John Doe',
+  },
 });
 // once john is created, the field values cannot be modified. create returns an instance with imutable fields. This forces some better coding habbits (on my part) and helps me reason about what *is* going into the database.
 ```

@@ -1,74 +1,92 @@
+const uuid = require("uuid");
+
 const FlameError = require("./errors");
 
 
 class Shape {
+  static base = Shape.#base();
+  #type = null;
   #meta = null;
   #val = null;
   #ref = null;
   #ext = null;
+  #ok = null;
 
-  constructor(meta, val, ref, ext) {
+  constructor(type, meta, val, ref, ext, ok) {
+    this.#type = type;
     this.#meta = meta;
     this.#val = val;
     this.#ref = ref;
     this.#ext = ext;
+    this.#ok = ok;
+
+    this.#meta.type = () => this.#type;
+    this.#meta.id = () => `${this.#type}:${uuid.v4()}`;
+
+    this.#ok.meta.type = (v) => typeof v === "string" && v.length > 0;
+    this.#ok.meta.id = (v) => typeof v === "string" && v.length > 0;
   }
 
-  static fromSpec(spec) {
-    // verify "meta" and "val" sections are present:
-    if (!("meta" in spec)) {
-      throw new FlameError(`'meta' section is missing from Flame spec`);
+  static #base() {
+    return new Shape(
+      "__flame__",
+      {}, // meta
+      {}, // val
+      {}, // ref
+      {}, // ext
+      {
+        meta: {},
+        val: {},
+        ref: {},
+        ext: {},
+      }, // ok
+    );
+  }
+
+  extend(type, spec) {
+    const meta = spec.meta ?? {};
+    const val = spec.val ?? {};
+    const ref = spec.ref ?? {};
+    const ext = spec.ext ?? {};
+    const ok = spec.ok ?? {};
+    ok.meta = ok.meta ?? {};
+    ok.val = ok.val ?? {};
+    ok.ref = ok.ref ?? {};
+    ok.ext = ok.ext ?? {};
+
+    // verify "id" and "type" aren't explicit in the "meta" section:
+    if ("id" in meta) {
+      throw new FlameError(`'id' is a reserved attribute for 'meta' section of Flame spec`);
     }
-    if (!("val" in spec)) {
-      throw new FlameError(`'val' section is missing from Flame spec`);
+    if ("type" in meta) {
+      throw new FlameError(`'type' is a reserved attribute for 'meta' section of Flame spec`);
     }
 
-    const meta = spec.meta;
-    const val = spec.val;
-    const ref = "ref" in spec ? spec.ref : {};
-    const ext = "ext" in spec ? spec.ext : {};
-
-    // verify "id" and "type" are present in the "meta" section:
-    if (!("id" in meta)) {
-      throw new FlameError(`'id' missing from 'meta' section of Flame spec`);
-    }
-    if (!("type" in meta)) {
-      throw new FlameError(`'type' missing from 'meta' section of Flame spec`);
-    }
-    if (typeof meta.type.default !== "string") {
-      throw new FlameError(`'meta.type.default' of Flame spec must be a string value`);
-    }
-
-    // verify 'ok' and 'default' in every field:
-    const checkField = (sectionName, key, field) => {
-      if (!("default" in field)) {
-        throw new FlameError(`'default' of '${key}' field of '${sectionName}' section of Flame spec is missing`);
-      }
-      if (typeof field.ok !== "function") {
-        throw new FlameError(`'ok' of '${key}' field of '${sectionName}' section of Flame spec must be a function`);
+    // verify 'ok' for every field:
+    const checkField = (sectionName, key) => {
+      if (typeof (ok[sectionName] ?? {})[key] !== "function") {
+        throw new FlameError(`'ok.${sectionName}.${key}' of Flame spec must be a function`);
       }
     };
-    const checkSection = (name, section) => Object.keys(section).forEach((k) => checkField(name, k, section[k]));
+    const checkSection = (name, section) => Object.keys(section).forEach((k) => checkField(name, k));
     checkSection("meta", meta);
     checkSection("val", val);
     checkSection("ref", ref);
     checkSection("ext", ext);
 
     // transforms all defaults into functions:
-    const transformField = (f) => {
-      if (typeof f.default !== "function") {
-        const v = f.default;
-        f.default = () => v;
-      }
+    const transformField = (spec, key) => {
+      const v = spec[key];
+      spec[key] = (typeof v === "function") ? v : () => v;
     };
-    const transformSection = (spec) => Object.keys(spec).forEach((k) => transformField(spec[k]));
+    const transformSection = (spec) => Object.keys(spec).forEach((k) => transformField(spec, k));
     transformSection(meta);
     transformSection(val);
     transformSection(ref);
     transformSection(ext);
 
     // create and return Shape:
-    return new Shape(meta, val, ref, ext);
+    return new Shape(type, meta, val, ref, ext, ok);
   }
 
   /*
@@ -76,38 +94,37 @@ class Shape {
    */
   spark(from) {
     // Initialize the object 'o' to be constructed and returned:
-    const o = {meta: {}, val: {}, ref: {}, ext: {}};
+    const o = {meta: {}, val: {}, ref: {}, ext: {}, ok: {}};
 
     // Init 'o' with the defaults:
-    const initField = (s, k, dfault) => s[k] = k in s ? s[k] : dfault();
-    const init = (s, spec) => Object.keys(spec).forEach((k) => initField(s, k, spec[k].default));
+    const init = (s, spec) => Object.keys(spec).forEach((k) => s[k] = spec[k]());
     init(o.meta, this.#meta);
     init(o.val, this.#val);
     init(o.ref, this.#ref);
     init(o.ext, this.#ext);
 
     // Verify 'from' is a subset of the specs:
-    const matches = (sectionName, o, from) => Object.keys(from[sectionName]).forEach((k) => {
+    const matches = (sectionName) => Object.keys(from[sectionName] ?? {}).forEach((k) => {
       if (!(k in o[sectionName])) throw new FlameError(`Unexpected key '${sectionName}.${k}'`);
     });
-    if ("meta" in from) matches("meta", o, from);
-    if ("val" in from) matches("val", o, from);
-    if ("rel" in from) matches("rel", o, from);
-    if ("ext" in from) matches("ext", o, from);
+    matches("meta");
+    matches("val");
+    matches("rel");
+    matches("ext");
 
     // Override the defaults with the explicitly given values:
     const set = (s, from) => Object.keys(from).forEach((k) => s[k] = from[k]);
-    if ("meta" in from) set(o.meta, from.meta);
-    if ("val" in from) set(o.val, from.val);
-    if ("ref" in from) set(o.ref, from.ref);
-    if ("ext" in from) set(o.ext, from.ext);
+    set(o.meta, from.meta ?? {});
+    set(o.val, from.val ?? {});
+    set(o.ref, from.ref ?? {});
+    set(o.ext, from.ext ?? {});
 
     // Define 'o.ok()':
-    const okSection = (s, spec) => Object.keys(s).every((k) => spec[k].ok(s[k]));
-    const okAll = (o) => okSection(o.meta, this.#meta) &&
-      okSection(o.val, this.#val) &&
-      okSection(o.ref, this.#ref) &&
-      okSection(o.ext, this.#ext);
+    const okSection = (s, spec) => Object.keys(s).every((k) => spec[k](s[k]));
+    const okAll = (o) => okSection(o.meta, this.#ok.meta) &&
+      okSection(o.val, this.#ok.val) &&
+      okSection(o.ref, this.#ok.ref) &&
+      okSection(o.ext, this.#ok.ext);
     o.ok = () => okAll(o);
 
     o.save = () => {

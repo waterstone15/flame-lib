@@ -16,10 +16,13 @@
   "dependencies": {
     "@stablelib/base64": "^1.0.1",
     "firebase": "^9.8.2",
-    "firebase-admin": "^10.2.0"
+    "firebase-admin": "^10.2.0",
+    "uuid": "^8.3.2"
   },
   "jest": {
     "automock": false,
-    "setupFiles": [ "<rootDir>/test/global-setup.js" ]
+    "setupFiles": [
+      "<rootDir>/test/global-setup.js"
+    ]
   }
 }

@@ -10,86 +10,55 @@ describe("Flame", () => {
   })
 
   it("creates basic Shape", async () => {
-    const shape = flame.shape({
-      meta: { id: { default: "id", ok: (v) => true }, type: { default: "Shape1", ok: (v) => true } },
-      val: {}
-    });
+    const shape = flame.shape("sh4pe", {});
     expect(shape).toEqual(expect.anything());
   });
 
   it("rejects Shape when 'ok' is not a function", async () => {
-    expect(() => flame.shape({
-      meta: { id: { default: "id", ok: true }, type: { default: "Shape1", ok: (v) => true } },
-      val: {}
+    expect(() => flame.shape("sh4pe", {
+      val: { x: "x" },
+      ok: { val: { x: true } }
     })).toThrow(FlameError);
   });
 
-  it("rejects Shape when 'meta.type.default' is a function", async () => {
-    expect(() => flame.shape({
-      meta: { id: { default: "id", ok: (v) => true }, type: { default: () => "Shape1", ok: (v) => true } },
-      val: {}
-    })).toThrow(FlameError);
+  it("rejects Shape when 'meta.type' is present", async () => {
+    expect(() => flame.shape("sh4pe", { meta: { type: "x" } })).toThrow(FlameError);
   });
 
-  it("rejects Shape without 'meta.id.ok'", async () => {
-    expect(() => flame.shape({
-      meta: { id: { default: "id" }, type: { default: "Shape1", ok: (v) => true } },
-      val: {}
-    })).toThrow(FlameError);
-  });
-
-  it("rejects Shape without 'meta.id'", async () => {
-    expect(() => flame.shape({
-      meta: { type: { default: "Shape1", ok: (v) => true } },
-      val: {}
-    })).toThrow(FlameError);
-  });
-
-  it("rejects Shape without 'meta.type'", async () => {
-    expect(() => flame.shape({
-      meta: { id: { default: "id", ok: (v) => true } },
-      val: {}
-    })).toThrow(FlameError);
+  it("rejects Shape when 'meta.id' is present", async () => {
+    expect(() => flame.shape("sh4pe", { meta: { id: "x" } })).toThrow(FlameError);
   });
 
   it("creates very complex Shape", async () => {
-    const shape = flame.shape({
+    const shape = flame.shape("sh4pe", {
       meta: {
-        id: {
-          default: "id",
-          ok: (v) => true,
-        },
-        type: {
-          default: "Person",
-          ok: (v) => true
-        },
-        lastModifiedTime: {
-          default: () => Date.now,
-          ok: (v) => typeof v === "number" && v > 0,
-        },
+        lastModifiedTime: () => Date.now,
       },
       val: {
-        firstName: {
-          default: null,
-          ok: (v) => typeof v === "string" && v.length > 0,
-        },
-        lastName: {
-          default: null,
-          ok: (v) => typeof v === "string" && v.length > 0,
-        },
+        firstName: null,
+        lastName: null,
       },
       ref: {
-        employerId: {
-          default: null,
-          ok: (v) => typeof v === "number" && v > 0,
-        }
+        employerId: null,
       },
       ext: {
-        bitcoinRef: {
-          default: null,
-          ok: (v) => typeof v === "string" && v.length > 10,
-        }
-      }
+        bitcoinRef: null,
+      },
+      ok: {
+        meta: {
+          lastModifiedTime: (v) => typeof v === "number" && v > 0,
+        },
+        val: {
+          firstName: (v) => typeof v === "string" && v.length > 0,
+          lastName: (v) => typeof v === "string" && v.length > 0,
+        },
+        ref: {
+          employerId: (v) => typeof v === "number" && v > 0,
+        },
+        ext: {
+          bitcoinRef: (v) => typeof v === "string" && v.length > 10,
+        },
+      },
     });
     expect(shape).toEqual(expect.anything());
   });
@@ -100,17 +69,19 @@ describe("Shape", () => {
 
   beforeAll(async () => {
     flame = await Flame.ignite("F2", {});
-    shape = flame.shape({
-      meta: { id: { default: "id", ok: (v) => true }, type: { default: "Shape1", ok: (v) => true } },
-      val: {}
+    shape = flame.shape("sh4pe", {
+      val: { name: "doe" },
+      ok: {
+        val: { name: (v) => true }
+      },
     });
   })
 
   it("creates Spark with defaults", async () => {
     const spark = shape.spark({});
     expect(spark).toMatchObject({
-      meta: { id: 'id', type: 'Shape1' },
-      val: {},
+      meta: { id: expect.anything(), type: 'sh4pe' },
+      val: { name: "doe" },
       ref: {},
       ext: {},
       ok: expect.anything(),
@@ -122,10 +93,10 @@ describe("Shape", () => {
   });
 
   it("creates Spark from given values", async () => {
-    const spark = shape.spark({ meta: { id: "abc", type: "xyz" }});
+    const spark = shape.spark({ val: { name: "xyz" }});
     expect(spark).toMatchObject({
-      meta: { id: 'abc', type: 'xyz' },
-      val: {},
+      meta: { id: expect.anything(), type: 'sh4pe' },
+      val: { name: "xyz" },
       ref: {},
       ext: {},
       ok: expect.anything(),
@@ -142,52 +113,44 @@ describe("Shape", () => {
 
 
   it("creates very complex Spark", async () => {
-    const shape = flame.shape({
+    const shape = flame.shape("Person", {
       meta: {
-        id: {
-          default: "id",
-          ok: (v) => true,
-        },
-        type: {
-          default: "Person",
-          ok: (v) => true
-        },
-        lastModifiedTime: {
-          default: () => Date.now,
-          ok: (v) => typeof v === "number" && v > 0,
-        },
+        lastModifiedTime: () => Date.now,
       },
       val: {
-        firstName: {
-          default: null,
-          ok: (v) => typeof v === "string" && v.length > 0,
-        },
-        lastName: {
-          default: null,
-          ok: (v) => typeof v === "string" && v.length > 0,
-        },
+        firstName: null,
+        lastName: null,
       },
       ref: {
-        employerId: {
-          default: null,
-          ok: (v) => typeof v === "number" && v > 0,
-        }
+        employerId: null,
       },
       ext: {
-        bitcoinRef: {
-          default: null,
-          ok: (v) => typeof v === "string" && v.length > 10,
-        }
-      }
+        bitcoinRef: null,
+      },
+      ok: {
+        meta: {
+          lastModifiedTime: (v) => typeof v === "number" && v > 0,
+        },
+        val: {
+          firstName: (v) => typeof v === "string" && v.length > 0,
+          lastName: (v) => typeof v === "string" && v.length > 0,
+        },
+        ref: {
+          employerId: (v) => typeof v === "number" && v > 0,
+        },
+        ext: {
+          bitcoinRef: (v) => typeof v === "string" && v.length > 10,
+        },
+      },
     });
     const spark = shape.spark({
-      meta: { id: "abc", lastModifiedTime: 123 },
+      meta: { lastModifiedTime: 123 },
       val: { firstName: "John", lastName: "Doe" },
       ref: { employerId: "E123" },
       ext: { bitcoinRef: "B123" },
     });
     expect(spark).toMatchObject({
-      meta: { id: 'abc', type: 'Person', lastModifiedTime: 123 },
+      meta: { id: expect.anything(), type: 'Person', lastModifiedTime: 123 },
       val: { firstName: "John", lastName: "Doe"},
       ref: { employerId: "E123" },
       ext: { bitcoinRef: "B123" },
@@ -205,16 +168,18 @@ describe("Spark", () => {
 
   beforeAll(async () => {
     flame = await Flame.ignite("F3", {});
-    shape = flame.shape({
-      meta: {
-        id: { default: null, ok: (v) => typeof v === "string" && v.length > 2 },
-        type: { default: "Shape1", ok: (v) => typeof v === "string" && v.length > 2 } },
-      val: {}
+    shape = flame.shape("sh4pe", {
+      val: { name: null },
+      ok: {
+        val: {
+          name: (v) => typeof v === "string" && v.length > 2,
+        },
+      }
     });
   })
 
   it("is 'ok()'", async () => {
-    const spark = shape.spark({ meta: { id: "123" } });
+    const spark = shape.spark({ val: { name: "123" } });
     const ok = spark.ok();
     expect(ok).toBe(true);
   });

@@ -18,8 +18,8 @@ class Flame {
     await this.#fbApp.delete();
   }
 
-  shape(spec) {
-    return Shape.fromSpec(spec);
+  shape(name, spec) {
+    return Shape.base.extend(name, spec);
   }
 
   write(...writables) {
