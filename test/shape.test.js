@@ -88,11 +88,6 @@ describe("Shape", () => {
       val: { name: "doe" },
       ref: {},
       ext: {},
-      ok: expect.anything(),
-      save: expect.anything(),
-      update: expect.anything(),
-      upsert: expect.anything(),
-      remove: expect.anything(),
     });
   });
 
@@ -103,11 +98,6 @@ describe("Shape", () => {
       val: { name: "xyz" },
       ref: {},
       ext: {},
-      ok: expect.anything(),
-      save: expect.anything(),
-      update: expect.anything(),
-      upsert: expect.anything(),
-      remove: expect.anything(),
     });
   });
 
@@ -158,11 +148,6 @@ describe("Shape", () => {
       val: { firstName: "John", lastName: "Doe"},
       ref: { employerId: "E123" },
       ext: { bitcoinRef: "B123" },
-      ok: expect.anything(),
-      save: expect.anything(),
-      update: expect.anything(),
-      upsert: expect.anything(),
-      remove: expect.anything(),
     });
   });
 });
