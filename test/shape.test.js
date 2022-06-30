@@ -158,30 +158,32 @@ describe("Spark", () => {
   beforeAll(async () => {
     flame = await Flame.ignite("F3", {}, dbURL, cert);
     shape = flame.shape("sh4pe", {
-      val: { name: null },
+      val: { firstName: null, lastName: null },
       ok: {
         val: {
-          name: (v) => typeof v === "string" && v.length > 2,
+          firstName: (v) => typeof v === "string" && v.length > 2,
+          lastName: (v) => typeof v === "string" && v.length > 2,
         },
       }
     });
   })
 
   it("is 'ok()'", async () => {
-    const spark = shape.spark({ val: { name: "123" } });
-    const ok = spark.ok();
-    expect(ok).toBe(true);
+    const spark = shape.spark({ val: { firstName: "123", lastName: "xyz" } });
+    expect(spark.ok()).toBe(true);
+    expect(spark.errors()).toEqual([]);
   });
 
   it("is not 'ok()' - value too short", async () => {
-    const spark = shape.spark({ meta: { id: "12" } });
-    const ok = spark.ok();
-    expect(ok).toBe(false);
+    const spark = shape.spark({ val: { firstName: "12", lastName: "xyz" } });
+    expect(spark.ok()).toBe(false);
+    expect(spark.errors()).toEqual(["val.firstName"]);
   });
 
   it("is not 'ok()' - value is null (the default)", async () => {
     const spark = shape.spark({});
     const ok = spark.ok();
     expect(ok).toBe(false);
+    expect(spark.errors()).toEqual(["val.firstName", "val.lastName"]);
   });
 });
