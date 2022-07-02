@@ -1,4 +1,4 @@
-const Flame = require("../src/flame");
+const Flame = require("../src/registry");
 const FlameError = require("../src/errors");
 
 

@@ -1,4 +1,3 @@
-const Fb = require("./firebase");
 const FlameError = require("./errors");
 const Shape = require("./shape");
 
@@ -9,9 +8,13 @@ const Shape = require("./shape");
  */
 class Flame {
   #fbApp = null;
+  #pluralize = null;
+  #baseShape = null;
 
-  constructor(fbApp) {
+  constructor(fbApp, pluralize) {
     this.#fbApp = fbApp;
+    this.#pluralize = pluralize;
+    this.#baseShape = Shape.base(this);
   }
 
   async quench() {
@@ -19,7 +22,7 @@ class Flame {
   }
 
   shape(name, spec) {
-    return Shape.base.extend(name, spec);
+    return this.#baseShape.extend(name, spec);
   }
 
   write(...writables) {
@@ -27,39 +30,5 @@ class Flame {
   }
 }
 
-/*
- * Manages singleton Flame instances by name.
- */
-class FlameRegistry {
-  static #instances = {};
 
-  static async ignite(name, config, dbURL, certificate) {
-    if (name in FlameRegistry.#instances) {
-      throw new FlameError(`Flame already exists for name '${name}'`);
-    }
-
-    const fbApp = await Fb.create(config);
-    FlameRegistry.#instances[name] = new Flame(fbApp);
-    return FlameRegistry.#instances[name];
-  }
-
-  static hold(name) {
-    if (!(name in FlameRegistry.#instances)) {
-      throw new FlameError(`Flame not found for name '${name}''`);
-    }
-
-    return FlameRegistry.#instances[name];
-  }
-
-  static async quench(name) {
-    if (!(name in FlameRegistry.#instances)) {
-      return;
-    }
-
-    await FlameRegistry.#instances[name].quench();
-    delete FlameRegistry.#instances[name];
-  }
-}
-
-
-module.exports = FlameRegistry;
+module.exports = Flame;
