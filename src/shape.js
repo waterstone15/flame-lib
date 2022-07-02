@@ -101,6 +101,21 @@ class Shape {
   list() {
     throw new FlameError(`Not implemented!`);
   }
+
+  /*
+   * Converts a Spark to the internal Json format suitable for persistence.
+   */
+  toInternalJson(spark) {
+    return spark.collapse();
+  }
+
+  /*
+   * Converts back into a Spark from the internal Json format from the persistence layer.
+   */
+  fromInternalJson(json) {
+    const values = Spark.expand(json);
+    return new Spark(this, values);
+  }
 }
 
 
