@@ -28,6 +28,34 @@ class Flame {
   write(...writables) {
     throw new FlameError(`Not implemented!`);
   }
+
+  get(id) {
+    throw new FlameError(`Not implemented!`);
+  }
+
+  find(...filters) {
+    throw new FlameError(`Not implemented!`);
+  }
+
+  list() {
+    throw new FlameError(`Not implemented!`);
+  }
+
+  save(spark) {
+    throw new FlameError(`Not implemented!`);
+  }
+
+  update(spark) {
+    throw new FlameError(`Not implemented!`);
+  }
+
+  upsert(spark) {
+    throw new FlameError(`Not implemented!`);
+  }
+
+  remove(spark) {
+    throw new FlameError(`Not implemented!`);
+  }
 }
 
 

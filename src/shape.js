@@ -30,10 +30,6 @@ class Shape {
     this.#ok.meta.id = (v) => typeof v === "string" && v.length > 0;
   }
 
-  ok(section, key) {
-    return this.#ok[section][key];
-  }
-
   extend(type, spec) {
     const defaults = {};
     const ok = {};
@@ -90,16 +86,47 @@ class Shape {
     return new Spark(this, values);
   }
 
+  ok(spark) {
+    return this.errors(spark).length == 0;
+  }
+
+  errors(spark) {
+    const okSection = section => {
+      const s = spark[section];
+      const badKeys = Object.keys(s).filter(k => !this.#ok[section][k](s[k]));
+      return badKeys.map(k => `${section}.${k}`);
+    };
+    var ret = [];
+    Spark.perSection(section => ret = ret.concat(okSection(section)));
+    return ret;
+  }
+
   get(id) {
-    throw new FlameError(`Not implemented!`);
+    return this.#flame.get(id);
   }
 
   find(...filters) {
-    throw new FlameError(`Not implemented!`);
+    return this.#flame.find(...filters);
   }
 
   list() {
-    throw new FlameError(`Not implemented!`);
+    return this.#flame.list(this);
+  }
+
+  save(spark) {
+    return this.#flame.save(spark);
+  }
+
+  update(spark) {
+    return this.#flame.update(spark);
+  }
+
+  upsert(spark) {
+    return this.#flame.upsert(spark);
+  }
+
+  remove(spark) {
+    return this.#flame.remove(spark);
   }
 
   /*

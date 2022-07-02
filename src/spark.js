@@ -28,34 +28,27 @@ class Spark {
   }
 
   ok() {
-    return this.errors().length == 0;
+    return this.shape.ok(this);
   }
 
   errors() {
-    const okSection = section => {
-      const s = this[section];
-      const badKeys = Object.keys(s).filter(k => !this.shape.ok(section, k)(s[k]));
-      return badKeys.map(k => `${section}.${k}`);
-    };
-    var ret = [];
-    Spark.perSection(section => ret = ret.concat(okSection(section)));
-    return ret;
+    return this.shape.errors(this);
   }
 
   save() {
-    throw new FlameError(`Not implemented!`);
+    return this.shape.save(this);
   }
 
   update() {
-    throw new FlameError(`Not implemented!`);
+    return this.shape.update(this);
   }
 
   upsert() {
-    throw new FlameError(`Not implemented!`);
+    return this.shape.upsert(this);
   }
 
   remove() {
-    throw new FlameError(`Not implemented!`);
+    return this.shape.remove(this);
   }
 
   /*
