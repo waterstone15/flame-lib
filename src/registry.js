@@ -1,4 +1,5 @@
 const Fb = require("./firebase");
+const Dao = require("./dao");
 const Flame = require("./flame");
 const FlameError = require("./errors");
 
@@ -14,8 +15,10 @@ class Registry {
       throw new FlameError(`Flame already exists for name '${name}'`);
     }
 
-    const fbApp = await Fb.create(config, dbURL, certificate);
-    Registry.#instances[name] = new Flame(fbApp, config.pluralize ?? false);
+    const fb = await Fb.create(config, dbURL, certificate);
+    const pluralize = config.pluralize ?? false;
+    const dao = new Dao(fb, pluralize);
+    Registry.#instances[name] = new Flame(dao);
     return Registry.#instances[name];
   }
 

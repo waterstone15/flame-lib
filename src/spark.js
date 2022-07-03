@@ -16,39 +16,49 @@ class Spark {
     callback("ext");
   }
 
-  shape = null;
+  #dao = null;
+  #validators = null;
   meta = null;
   val = null;
   ref = null;
   ext = null;
 
-  constructor(shape, values) {
-    this.shape = shape;
-    Spark.perSection(section => this[section] = values[section]);
-  }
-
-  ok() {
-    return this.shape.ok(this);
+  constructor(dao, validators, plainObj) {
+    this.#dao = dao;
+    this.#validators = validators;
+    Spark.perSection(section => this[section] = {});
+    Spark.perSection(section => Object.keys(plainObj[section]).forEach(key => this[section][key] = plainObj[section][key]));
   }
 
   errors() {
-    return this.shape.errors(this);
+    const okSection = section => {
+      const s = this[section];
+      const badKeys = Object.keys(s).filter(k => !this.#validators[section][k](s[k]));
+      return badKeys.map(k => `${section}.${k}`);
+    };
+    var ret = [];
+    Spark.perSection(section => ret = ret.concat(okSection(section)));
+    return ret;
+  }
+
+  ok() {
+    return this.errors().length == 0;
   }
 
   save() {
-    return this.shape.save(this);
+    return this.#dao.save(this);
   }
 
   update() {
-    return this.shape.update(this);
+    return this.#dao.update(this);
   }
 
   upsert() {
-    return this.shape.upsert(this);
+    return this.#dao.upsert(this);
   }
 
   remove() {
-    return this.shape.remove(this);
+    return this.#dao.remove(this.meta.id);
   }
 
   /*

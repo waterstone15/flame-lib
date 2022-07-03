@@ -12,13 +12,13 @@ class Shape {
     return new Shape(flame, "__flame__", defaults, ok);
   }
 
-  #flame = null;
+  #dao = null;
   #type = null;
   #defaults = null;
   #ok = null;
 
-  constructor(flame, type, defaults, ok) {
-    this.#flame = flame;
+  constructor(dao, type, defaults, ok) {
+    this.#dao = dao;
     this.#type = type;
     this.#defaults = defaults;
     this.#ok = ok;
@@ -62,7 +62,7 @@ class Shape {
       Object.keys(s).forEach((k) => normalize(s, k));
     });
 
-    return new Shape(this.#flame, type, defaults, ok);
+    return new Shape(this.#dao, type, defaults, ok);
   }
 
   /*
@@ -83,50 +83,23 @@ class Shape {
       values[section] = s;
     });
 
-    return new Spark(this, values);
-  }
-
-  ok(spark) {
-    return this.errors(spark).length == 0;
-  }
-
-  errors(spark) {
-    const okSection = section => {
-      const s = spark[section];
-      const badKeys = Object.keys(s).filter(k => !this.#ok[section][k](s[k]));
-      return badKeys.map(k => `${section}.${k}`);
-    };
-    var ret = [];
-    Spark.perSection(section => ret = ret.concat(okSection(section)));
-    return ret;
+    return new Spark(this.#dao, this.#ok, values);
   }
 
   get(id) {
-    return this.#flame.get(id);
+    return this.#dao.get(id);
   }
 
   find(...filters) {
-    return this.#flame.find(...filters);
+    return this.#dao.find(...filters);
   }
 
   list() {
-    return this.#flame.list(this);
+    return this.#dao.list(this);
   }
 
-  save(spark) {
-    return this.#flame.save(spark);
-  }
-
-  update(spark) {
-    return this.#flame.update(spark);
-  }
-
-  upsert(spark) {
-    return this.#flame.upsert(spark);
-  }
-
-  remove(spark) {
-    return this.#flame.remove(spark);
+  remove(id) {
+    return this.#dao.remove(id);
   }
 
   /*
@@ -141,7 +114,7 @@ class Shape {
    */
   fromInternalJson(json) {
     const values = Spark.expand(json);
-    return new Spark(this, values);
+    return new Spark(this.#dao, this.#ok, values);
   }
 }
 

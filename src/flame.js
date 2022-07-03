@@ -7,18 +7,17 @@ const Shape = require("./shape");
  * Instances of this are to be managed only via the FlameRegistry.
  */
 class Flame {
-  #fbApp = null;
-  #pluralize = null;
+  #dao = null;
   #baseShape = null;
 
-  constructor(fbApp, pluralize) {
-    this.#fbApp = fbApp;
-    this.#pluralize = pluralize;
-    this.#baseShape = Shape.base(this);
+  constructor(dao) {
+    this.#dao = dao;
+    this.#baseShape = Shape.base(dao);
   }
 
   async quench() {
-    await this.#fbApp.delete();
+    await this.#dao.release();
+    this.#dao = null;
   }
 
   shape(name, spec) {
@@ -26,34 +25,6 @@ class Flame {
   }
 
   write(...writables) {
-    throw new FlameError(`Not implemented!`);
-  }
-
-  get(id) {
-    throw new FlameError(`Not implemented!`);
-  }
-
-  find(...filters) {
-    throw new FlameError(`Not implemented!`);
-  }
-
-  list() {
-    throw new FlameError(`Not implemented!`);
-  }
-
-  save(spark) {
-    throw new FlameError(`Not implemented!`);
-  }
-
-  update(spark) {
-    throw new FlameError(`Not implemented!`);
-  }
-
-  upsert(spark) {
-    throw new FlameError(`Not implemented!`);
-  }
-
-  remove(spark) {
     throw new FlameError(`Not implemented!`);
   }
 }
