@@ -86,20 +86,20 @@ class Shape {
     return new Spark(this.#dao, this.#ok, values);
   }
 
-  get(id) {
-    return this.#dao.get(id);
+  async get(id) {
+    return await this.#dao.get(this.#type, id, this.#ok);
   }
 
-  find(...filters) {
-    return this.#dao.find(...filters);
+  async find(...filters) {
+    return await this.#dao.find(this.#type, ...filters);
   }
 
-  list() {
-    return this.#dao.list(this);
+  async list(...filters) {
+    return await this.#dao.list(this.#type, ...filters);
   }
 
-  remove(id) {
-    return this.#dao.remove(id);
+  async remove(id) {
+    await this.#dao.remove(id);
   }
 
   /*

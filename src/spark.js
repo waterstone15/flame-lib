@@ -45,20 +45,20 @@ class Spark {
     return this.errors().length == 0;
   }
 
-  save() {
-    return this.#dao.save(this);
+  async save() {
+    await this.#dao.insert(this);
   }
 
-  update() {
-    return this.#dao.update(this);
+  async update() {
+    await this.#dao.update(this);
   }
 
-  upsert() {
-    return this.#dao.upsert(this);
+  async upsert() {
+    await this.#dao.upsert(this);
   }
 
-  remove() {
-    return this.#dao.remove(this.meta.id);
+  async remove() {
+    await this.#dao.remove(this.meta.id);
   }
 
   /*

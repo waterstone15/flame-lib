@@ -1,5 +1,6 @@
-const Fb = require("./firebase");
-const Flame = require("./flame");
+const pluralize = require("pluralize");
+const casing = require("change-case");
+
 const FlameError = require("./errors");
 
 
@@ -19,34 +20,65 @@ class Dao {
     await this.#fb.delete();
   }
 
-  get(id) {
-    throw new FlameError(`Not implemented!`);
+  async get(type, id, validators) {
+    const collection = this.#collection(type);
+    const doc = db.collection(collection).doc(id);
+    const res = await doc.get();
+    if (!res.exists) {
+      throw new FlameError(`Spark '${id}' for shape '${type}' not found`);
+    }
+    return new Spark(this, validators, res.data());
   }
 
-  find(...filters) {
+  async find(type, ...filters) {
+    const collection = this.#collection(type);
+    const doc = db.collection(collection);
+
     throw new FlameError(`Not implemented!`);
+    // https://googleapis.dev/nodejs/firestore/latest/CollectionReference.html#endAt-examples
   }
 
-  list() {
+  async list(type, ...filters) {
+    const collection = this.#collection(type);
+    const doc = db.collection(collection);
+
     throw new FlameError(`Not implemented!`);
+    // https://googleapis.dev/nodejs/firestore/latest/CollectionReference.html#endAt-examples
   }
 
-  save(spark) {
-    throw new FlameError(`Not implemented!`);
+  async insert(spark) {
+    const doc = this.#docRef(spark);
+    await doc.create(plainObj);
   }
 
-  update(spark) {
-    throw new FlameError(`Not implemented!`);
+  async update(spark) {
+    const doc = this.#docRef(spark);
+    await ref.update(plainObj);
   }
 
-  upsert(spark) {
-    throw new FlameError(`Not implemented!`);
+  async upsert(spark) {
+    const doc = this.#docRef(spark);
+    await doc.set(plainObj);
   }
 
-  remove(id) {
-    throw new FlameError(`Not implemented!`);
+  async remove(id) {
+    const doc = this.#docRef(spark);
+    await doc.delete(plainObj);
   }
 
+  #docRef(spark) {
+    const id = spark.meta.id;
+    const type = spark.meta.type;
+    const plainObj = spark.plainObject();
+    const collection = this.#collection(type);
+
+    return db.collection(collection).doc(id);
+  }
+
+  #collection(type) {
+    const name = this.#pluralize ? pluralize(type) : type;
+    return casing.paramCase(name);
+  }
 }
 
 
