@@ -45,7 +45,7 @@ class Spark {
     return this.errors().length == 0;
   }
 
-  async save() {
+  async insert() {
     await this.#dao.insert(this);
   }
 
@@ -58,7 +58,7 @@ class Spark {
   }
 
   async remove() {
-    await this.#dao.remove(this.meta.id);
+    await this.#dao.remove(this.meta.type, this.meta.id);
   }
 
   /*

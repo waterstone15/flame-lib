@@ -2,7 +2,7 @@ const Flame = require("../src/registry");
 const FlameError = require("../src/errors");
 
 
-const cert = JSON.parse(Buffer.from(process.env.FIREBASE_CONFIG_BASE64, 'base64').toString());
+const cfg = JSON.parse(Buffer.from(process.env.FIREBASE_CONFIG_BASE64, 'base64').toString());
 const dbURL = process.env.FIREBASE_DATABASE_URL;
 
 
@@ -10,8 +10,12 @@ describe("Flame", () => {
   flame = null;
 
   beforeAll(async () => {
-    flame = await Flame.ignite("F1", {}, dbURL, cert);
+    flame = await Flame.ignite("F1", cfg, dbURL);
   })
+
+  afterAll(async () => {
+     await Flame.quench("F1");
+  });
 
   it("creates basic Shape", async () => {
     const shape = flame.shape("sh4pe", {});
@@ -72,7 +76,7 @@ describe("Shape", () => {
   shape = null;
 
   beforeAll(async () => {
-    flame = await Flame.ignite("F2", {}, dbURL, cert);
+    flame = await Flame.ignite("F2", cfg, dbURL);
     shape = flame.shape("sh4pe", {
       val: { name: "doe" },
       ok: {
@@ -80,6 +84,10 @@ describe("Shape", () => {
       },
     });
   })
+
+  afterAll(async () => {
+     await Flame.quench("F2");
+  });
 
   it("creates Spark with defaults", async () => {
     const spark = shape.spark({});
@@ -156,7 +164,7 @@ describe("Spark", () => {
   shape = null;
 
   beforeAll(async () => {
-    flame = await Flame.ignite("F3", {}, dbURL, cert);
+    flame = await Flame.ignite("F3", cfg, dbURL);
     shape = flame.shape("sh4pe", {
       val: { firstName: null, lastName: null },
       ok: {
@@ -167,6 +175,10 @@ describe("Spark", () => {
       }
     });
   })
+
+  afterAll(async () => {
+     await Flame.quench("F3");
+  });
 
   it("is 'ok()'", async () => {
     const spark = shape.spark({ val: { firstName: "123", lastName: "xyz" } });

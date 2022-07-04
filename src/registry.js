@@ -10,14 +10,14 @@ const FlameError = require("./errors");
 class Registry {
   static #instances = {};
 
-  static async ignite(name, config, dbURL, certificate) {
+  static async ignite(name, config, dbURL) {
     if (name in Registry.#instances) {
       throw new FlameError(`Flame already exists for name '${name}'`);
     }
 
-    const fb = await Fb.create(config, dbURL, certificate);
+    const fbApp = await Fb.create(config, dbURL);
     const pluralize = config.pluralize ?? false;
-    const dao = new Dao(fb, pluralize);
+    const dao = new Dao(fbApp, pluralize);
     Registry.#instances[name] = new Flame(dao);
     return Registry.#instances[name];
   }
