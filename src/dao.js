@@ -25,30 +25,49 @@ class Dao {
     await this.#fbApp.delete();
   }
 
-  async get(type, id, validators) {
+  async get(type, validators, id) {
     const collection = this.#collection(type);
     const doc = this.#db.collection(collection).doc(id);
     const res = await doc.get();
     if (!res.exists) {
-      throw new FlameError(`Spark '${id}' for shape '${type}' not found`);
+      return null;
     }
     return new Spark(this, validators, res.data());
   }
 
-  async find(type, ...filters) {
+  async find(type, validators, filters) {
     const collection = this.#collection(type);
     const doc = this.#db.collection(collection);
 
-    throw new FlameError(`Not implemented!`);
-    // https://googleapis.dev/nodejs/firestore/latest/CollectionReference.html#endAt-examples
+    var query = doc.where("meta.type", "==", type);
+    filters.forEach(filter => {
+      // query = query.where(filter.field, filter.op, filter.value);
+      query = query.where(filter[0], filter[1], filter[2]);
+    });
+    const res = await query.get();
+
+    if (res.empty) {
+      return null;
+    } else if (res.size == 1) {
+      const plainObject = res.docs[0].data();
+      return new Spark(this, validators, plainObject);
+    } else {
+      throw new FlameError(`More than one Sparks match the given filters`);
+    }
   }
 
-  async list(type, ...filters) {
+  async list(type, validators, filters) {
     const collection = this.#collection(type);
     const doc = this.#db.collection(collection);
 
-    throw new FlameError(`Not implemented!`);
-    // https://googleapis.dev/nodejs/firestore/latest/CollectionReference.html#endAt-examples
+    var query = doc.where("meta.type", "==", type);
+    filters.forEach(filter => {
+      // query = query.where(filter.field, filter.op, filter.value);
+      query = query.where(filter[0], filter[1], filter[2]);
+    });
+    const res = await query.get();
+
+    return res.docs.map(doc => new Spark(this, validators, doc.data()));
   }
 
   async insert(spark) {

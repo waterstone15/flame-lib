@@ -10,6 +10,7 @@
 <hr style='height: 1px;'/>
 <br>
 
+Usage:
 1. [Ignite](#ignite)
 2. [Hold](#hold)
 3. [Quench](#quench)
@@ -178,3 +179,11 @@ await Flame.write([
 ]);
 // save, update, and del all return 'writables' which Flame.write then converts into a firestore write batch
 ```
+
+
+## Development
+
+### To run the tests:
+0. install Firebase emulators ```firebase init```
+1. start Firebase emulators: ```firebase emulators:start```
+2. run the tests: ```npm run test```

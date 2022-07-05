@@ -87,15 +87,15 @@ class Shape {
   }
 
   async get(id) {
-    return await this.#dao.get(this.#type, id, this.#ok);
+    return await this.#dao.get(this.#type, this.#ok, id);
   }
 
   async find(...filters) {
-    return await this.#dao.find(this.#type, ...filters);
+    return await this.#dao.find(this.#type, this.#ok, filters);
   }
 
   async list(...filters) {
-    return await this.#dao.list(this.#type, ...filters);
+    return await this.#dao.list(this.#type, this.#ok, filters);
   }
 
   async remove(id) {
