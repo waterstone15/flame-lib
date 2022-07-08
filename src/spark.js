@@ -73,7 +73,7 @@ class Spark {
   }
 
   /*
-   * Converts this Spark to the internal Json format suitable for persistence.
+   * Converts to a collapsed JS Object suitable for persistence.
    */
   collapse() {
     const json = {};
@@ -83,7 +83,7 @@ class Spark {
   }
 
   /*
-   * Converts from the internal Json format back into a Spark plain object.
+   * Converts a collapsed JS Object back into a Spark JS Object.
    */
   static expand(json) {
     const values = {};
