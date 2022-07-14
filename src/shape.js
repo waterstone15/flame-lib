@@ -95,8 +95,8 @@ class Shape {
     return await this.#dao.find(this.#type, this.#ok, filters);
   }
 
-  async list(pageSize, pageNo, ...filters) {
-    return await this.#dao.list(this.#type, this.#ok, pageSize, pageNo, filters);
+  async list(pageSize, pageNo, orderBy, fields, ...filters) {
+    return await this.#dao.list(this.#type, this.#ok, pageSize, pageNo, orderBy, fields, filters);
   }
 
   async remove(id) {

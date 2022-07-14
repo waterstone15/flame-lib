@@ -57,7 +57,7 @@ class Dao {
     }
   }
 
-  async list(type, validators, pageSize, pageNo, filters) {
+  async list(type, validators, pageSize, pageNo, orderBy, fields, filters) {
     const collection = this.#collection(type);
     const doc = this.#db.collection(collection);
 
@@ -66,10 +66,17 @@ class Dao {
       // query = query.where(filter.field, filter.op, filter.value);
       query = query.where(`${filter[0]}:${filter[1]}`, filter[2], filter[3]);
     });
+    if (orderBy !== null) {
+      query = query.orderBy(...orderBy);
+    }
+    if (fields !== null) {
+      query = query.select(...fields);
+    }
     query = query.limit(pageSize).offset(pageSize * pageNo);
     const res = await query.get();
+    const docs = res.docs.map(doc => Spark.expand(doc.data()));
 
-    return res.docs.map(doc => new Spark(this, validators, Spark.expand(doc.data())));
+    return fields !== null ? docs : docs.map(doc => new Spark(this, validators, doc));
   }
 
   async insert(spark) {

@@ -64,36 +64,45 @@ describe("Spark", () => {
     const spark3 = shape.spark({ val: { firstName: "33", lastName: "xxx" } });
 
     await expect(shape.find(["val", "firstName", "==", "11"])).resolves.toBe(null);
-    await expect(shape.list(10, 0, ["val", "lastName", "==", "xxx"])).resolves.toEqual([]);
+    await expect(shape.list(10, 0, null, null, ["val", "lastName", "==", "xxx"])).resolves.toEqual([]);
     await spark1.insert();
     await expect(shape.find(["val", "firstName", "==", "11"])).resolves.toEqual(spark1);
-    await expect(shape.list(10, 0, ["val", "lastName", "==", "xxx"])).resolves.toEqual([spark1]);
+    await expect(shape.list(10, 0, null, null, ["val", "lastName", "==", "xxx"])).resolves.toEqual([spark1]);
     await spark2.upsert();
     await spark3.insert();
     await expect(shape.find(["val", "firstName", "==", "22"])).resolves.toEqual(spark2);
     await expect(shape.find(["val", "firstName", "==", "33"])).resolves.toEqual(spark3);
-    const sparks = await shape.list(10, 0, ["val", "lastName", "==", "xxx"]);
+    const sparks = await shape.list(10, 0, null, null, ["val", "lastName", "==", "xxx"]);
     expect(sparks.length).toEqual(3);
     expect(sparks).toEqual(expect.arrayContaining([spark1, spark2, spark3]));
   });
 
   it("lists paginated", async () => {
-    const spark1 = shape.spark({ val: { firstName: "11", lastName: "yyy" } });
-    const spark2 = shape.spark({ val: { firstName: "22", lastName: "yyy" } });
-    const spark3 = shape.spark({ val: { firstName: "33", lastName: "yyy" } });
-    const spark4 = shape.spark({ val: { firstName: "44", lastName: "yyy" } });
-    const spark5 = shape.spark({ val: { firstName: "55", lastName: "yyy" } });
+    await shape.spark({ val: { firstName: "11", lastName: "yyy" } }).insert();
+    await shape.spark({ val: { firstName: "22", lastName: "yyy" } }).insert();
+    await shape.spark({ val: { firstName: "33", lastName: "yyy" } }).insert();
+    await shape.spark({ val: { firstName: "44", lastName: "yyy" } }).insert();
+    await shape.spark({ val: { firstName: "55", lastName: "yyy" } }).insert();
     const filter = ["val", "lastName", "==", "yyy"];
 
-    await spark1.insert();
-    await spark2.insert();
-    await spark3.insert();
-    await spark4.insert();
-    await spark5.insert();
+    await expect(shape.list(2, 0, null, null, filter)).resolves.toHaveLength(2);
+    await expect(shape.list(2, 1, null, null, filter)).resolves.toHaveLength(2);
+    await expect(shape.list(2, 2, null, null, filter)).resolves.toHaveLength(1);
+    await expect(shape.list(2, 3, null, null, filter)).resolves.toHaveLength(0);
+  });
 
-    await expect(shape.list(2, 0, filter)).resolves.toHaveLength(2);
-    await expect(shape.list(2, 1, filter)).resolves.toHaveLength(2);
-    await expect(shape.list(2, 2, filter)).resolves.toHaveLength(1);
-    await expect(shape.list(2, 3, filter)).resolves.toHaveLength(0);
+  it("lists specific fields", async () => {
+    await shape.spark({ val: { firstName: "11", lastName: "zzz" } }).insert();
+    await shape.spark({ val: { firstName: "22", lastName: "zzz" } }).insert();
+    await shape.spark({ val: { firstName: "33", lastName: "zzz" } }).insert();
+    await shape.spark({ val: { firstName: "44", lastName: "zzz" } }).insert();
+
+    await expect(shape.list(10, 0, ["val:firstName"], ["val:firstName"], ["val", "lastName", "==", "zzz"]))
+      .resolves.toEqual([
+        { val: { firstName: "11" }, meta: {}, ref: {}, ext: {} },
+        { val: { firstName: "22" }, meta: {}, ref: {}, ext: {} },
+        { val: { firstName: "33" }, meta: {}, ref: {}, ext: {} },
+        { val: { firstName: "44" }, meta: {}, ref: {}, ext: {} },
+      ]);
   });
 });

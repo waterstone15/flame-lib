@@ -143,10 +143,14 @@ john = await Person.find(['firstName', '==', 'John'], ['lastName', '==', 'Doe'])
 
 ### List
 ```javascript
-await Person.list(10, 2, ['name', '>', 'J'], ['order_by', 'name'], ['meta.id', 'val.name']);
-// returns at most 10 records, on page #2 (zero-based) - so starting from the 21st position.
-// results can 'pick' specific fields.
-// TODO: order-by and field-picking not implemented yet.
+await Person.list(
+  10,  // page size
+  2, // page number (zero based)
+  ['name'],  // order by (null for no order)
+  ['meta:id', 'val:name'], // fields to retrieve (null for full Sparks)
+  ['val', 'name', '>', 'J'], // filters
+  ['meta', 'createdAt', '>', '2021-03-03T01:01:01Z'], // filters ...
+);
 ```
 
 ### Write Transaction
