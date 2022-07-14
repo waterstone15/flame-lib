@@ -40,4 +40,13 @@ describe("Flame", () => {
     await expect(Flame.ignite("flame-R", cfg, dbURL)).rejects.toThrow(FlameError);
     await flame.quench();
   });
+
+  it("exposes firebase app", async () => {
+    const flame = await Flame.ignite("flame-Q", cfg, dbURL);
+    expect(flame.wildfire()).toMatchObject({
+      firebase: expect.anything(),
+      firestore: expect.anything(),
+    });
+    await flame.quench();
+  });
 });

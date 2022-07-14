@@ -27,6 +27,10 @@ class Flame {
   write(...writables) {
     throw new FlameError(`Not implemented!`);
   }
+
+  wildfire() {
+    return this.#dao.wildfire();
+  }
 }
 
 

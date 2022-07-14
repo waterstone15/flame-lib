@@ -1,3 +1,5 @@
+const Fragments = require("./fragments");
+const Util = require("./util");
 const FlameError = require("./errors");
 
 
@@ -5,17 +7,6 @@ const FlameError = require("./errors");
  * A Flame Shape Instance.
  */
 class Spark {
-  /*
-   * Invoke given callback for each section of a Spark / Shape.
-   * This exists in order to minimize the number of places that have to know the full set of sections.
-   */
-  static perSection(callback) {
-    callback("meta");
-    callback("val");
-    callback("ref");
-    callback("ext");
-  }
-
   #dao = null;
   #validators = null;
   meta = null;
@@ -26,8 +17,8 @@ class Spark {
   constructor(dao, validators, plainObj) {
     this.#dao = dao;
     this.#validators = validators;
-    Spark.perSection(section => this[section] = {});
-    Spark.perSection(section => Object.keys(plainObj[section]).forEach(key => this[section][key] = plainObj[section][key]));
+    Util.perSection(section => this[section] = {});
+    Util.perSection(section => Object.keys(plainObj[section]).forEach(key => this[section][key] = plainObj[section][key]));
   }
 
   errors() {
@@ -37,7 +28,7 @@ class Spark {
       return badKeys.map(k => `${section}.${k}`);
     };
     var ret = [];
-    Spark.perSection(section => ret = ret.concat(okSection(section)));
+    Util.perSection(section => ret = ret.concat(okSection(section)));
     return ret;
   }
 
@@ -50,7 +41,8 @@ class Spark {
   }
 
   async update() {
-    await this.#dao.update(this);
+    const fragments = new Fragments(this.#dao, this.#validators, this.plainObject());
+    await fragments.update();
   }
 
   async upsert() {
@@ -66,9 +58,9 @@ class Spark {
    */
   plainObject() {
     const o = {};
-    Spark.perSection(section => o[section] = {});
+    Util.perSection(section => o[section] = {});
     const encode = (section, key) => o[section][key] = this[section][key];
-    Spark.perSection(section => Object.keys(this[section]).forEach(key => encode(section, key)));
+    Util.perSection(section => Object.keys(this[section]).forEach(key => encode(section, key)));
     return o;
   }
 
@@ -78,7 +70,7 @@ class Spark {
   collapse() {
     const json = {};
     const encode = (section, key) => json[`${section}:${key}`] = this[section][key];
-    Spark.perSection(section => Object.keys(this[section]).forEach(key => encode(section, key)));
+    Util.perSection(section => Object.keys(this[section]).forEach(key => encode(section, key)));
     return json;
   }
 
@@ -87,7 +79,7 @@ class Spark {
    */
   static expand(json) {
     const values = {};
-    Spark.perSection(section => values[section] = {});
+    Util.perSection(section => values[section] = {});
 
     const decode = (encodedKey) => {
       const [section, key] = encodedKey.split(":");

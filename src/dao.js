@@ -71,7 +71,7 @@ class Dao {
   }
 
   async insert(spark) {
-    const doc = this.#docRef(spark);
+    const doc = this.#docRef(spark.meta);
     try {
       await doc.create(spark.plainObject());
     } catch(err) {
@@ -83,13 +83,14 @@ class Dao {
     }
   }
 
-  async update(spark) {
-    const doc = this.#docRef(spark);
+  async update(fragments) {
+    const meta = fragments.meta;
+    const doc = this.#docRef(meta);
     try {
-      await doc.update(spark.plainObject());
+      await doc.update(fragments.plainObject());
     } catch(err) {
       if (err.code === 5) { // "not-fouund"
-        throw new FlameError(`Spark '${spark.meta.id}' for shape '${spark.meta.type}' not found`);
+        throw new FlameError(`Spark '${meta.id}' for shape '${meta.type}' not found`);
       } else {
         throw err;
       }
@@ -97,7 +98,7 @@ class Dao {
   }
 
   async upsert(spark) {
-    const doc = this.#docRef(spark);
+    const doc = this.#docRef(spark.meta);
     await doc.set(spark.plainObject());
   }
 
@@ -108,9 +109,9 @@ class Dao {
     await doc.delete();
   }
 
-  #docRef(spark) {
-    const id = spark.meta.id;
-    const type = spark.meta.type;
+  #docRef(meta) {
+    const id = meta.id;
+    const type = meta.type;
     const collection = this.#collection(type);
 
     return this.#db.collection(collection).doc(id);
@@ -119,6 +120,13 @@ class Dao {
   #collection(type) {
     const name = this.#pluralize ? pluralize(type) : type;
     return casing.paramCase(name);
+  }
+
+  wildfire() {
+    return {
+      firebase: this.#fbApp,
+      firestore: this.#db,
+    }
   }
 }
 

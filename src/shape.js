@@ -1,14 +1,15 @@
 const uuid = require("uuid");
 
 const Spark = require("./spark");
+const Util = require("./util");
 const FlameError = require("./errors");
 
 
 class Shape {
   static base(flame) {
     const defaults = {}, ok = {};
-    Spark.perSection(section => defaults[section] = {});
-    Spark.perSection(section => ok[section] = {});
+    Util.perSection(section => defaults[section] = {});
+    Util.perSection(section => ok[section] = {});
     return new Shape(flame, "__flame__", defaults, ok);
   }
 
@@ -33,8 +34,8 @@ class Shape {
   extend(type, spec) {
     const defaults = {};
     const ok = {};
-    Spark.perSection(section => defaults[section] = spec[section] ?? {});
-    Spark.perSection(section => ok[section] = (spec.ok ?? {})[section] ?? {});
+    Util.perSection(section => defaults[section] = spec[section] ?? {});
+    Util.perSection(section => ok[section] = (spec.ok ?? {})[section] ?? {});
 
     // verify "id" and "type" aren't explicit in the "meta" section:
     if ("id" in defaults.meta) {
@@ -50,14 +51,14 @@ class Shape {
         throw new FlameError(`'ok.${section}.${key}' of Flame spec must be a function`);
       }
     };
-    Spark.perSection(section => Object.keys(defaults[section]).forEach((k) => check(section, k)));
+    Util.perSection(section => Object.keys(defaults[section]).forEach((k) => check(section, k)));
 
     // normalize all defaults to be functions:
     const normalize = (spec, key) => {
       const v = spec[key];
       spec[key] = (typeof v === "function") ? v : () => v;
     };
-    Spark.perSection(section => {
+    Util.perSection(section => {
       const s = defaults[section];
       Object.keys(s).forEach((k) => normalize(s, k));
     });
@@ -70,13 +71,13 @@ class Shape {
    */
   spark(from) {
     // Verify 'from' is a subset of the specs:
-    Spark.perSection(section => Object.keys(from[section] ?? {}).forEach((k) => {
+    Util.perSection(section => Object.keys(from[section] ?? {}).forEach((k) => {
       if (!(k in this.#defaults[section])) throw new FlameError(`Unexpected key '${section}.${k}'`);
     }));
 
     // Initialize all fields:
     const values = {};
-    Spark.perSection(section => {
+    Util.perSection(section => {
       const defaults = this.#defaults[section];
       const s = {...from[section] ?? {}};
       Object.keys(defaults).forEach((k) => s[k] = k in s ? s[k] : defaults[k]());
