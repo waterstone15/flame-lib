@@ -7,7 +7,7 @@ const FlameError = require("./errors");
 
 
 /*
- * Persisntence layer over Firebase for Sparks.
+ * Persisntence layer (DAO = Data Access Object) over Firebase for Sparks.
  */
 class Dao {
   #fbApp = null;
@@ -56,7 +56,7 @@ class Dao {
     }
   }
 
-  async list(type, validators, filters) {
+  async list(type, validators, pageSize, pageNo, filters) {
     const collection = this.#collection(type);
     const doc = this.#db.collection(collection);
 
@@ -65,6 +65,7 @@ class Dao {
       // query = query.where(filter.field, filter.op, filter.value);
       query = query.where(filter[0], filter[1], filter[2]);
     });
+    query = query.limit(pageSize).offset(pageSize * pageNo);
     const res = await query.get();
 
     return res.docs.map(doc => new Spark(this, validators, doc.data()));
