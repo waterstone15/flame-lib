@@ -103,71 +103,50 @@ john = Person.spark({
 
 ### Ok
 ```javascript
-john.ok();
-// runs the validator for each field.
-// => true | false
-
-john.ok(['val.name']);
-// validates just the set of fields passed in (will come in handy for udpates)
-
 john.errors();
 // returns an object like { val: { name: 'John Doe' }} of the fields that are not valid.
 
-john.errors(['val.name']);
-// returns an object like { val: { name: 'John Doe' }} of the fields that are not valid but only for the passed in fields
+john.ok();
+// returns true IFF there are no errors
 ```
 
-### Save
+### Insert (aka Save)
 ```javascript
-await john.save().write();
-// john.save returns a 'writable' – Flames own internal representation of what can be turned into a firebase document reference and the javascript object for saving to firestore.
+await john.insert();
 ```
 
 ### Update
 ```javascript
-await john.update(['val.name']).write();
-// john.update returns a 'writable' – Flames own internal representation of what can be turned into a firebase document reference and the javascript object for updating firestore.
+await john.update();
 ```
 
 ### Upsert
 ```javascript
-await john.upsert(['val.name']).write();
-// john.update returns a 'writable' – Flames own internal representation of what can be turned into a firebase document reference and the javascript object for saving or updating firestore.
-// not sure about this one yet. There are some odd edgaces in the cases I use 'upsert' style operations...
+await john.upsert();
 ```
 
-### Delete
+### Remove (aka Delete)
 ```javascript
-await john.del().write();
-// delete instead of delete because delete is a JavaScript keyword.
-// john.del returns a 'writable' – Flames own internal representation of what can be turned into a firebase document reference and the javascript object for deleting from firestore.
+await john.remove();
 ```
 
 ### Get
 ```javascript
-await Person.get('id').read();
-// Model.get() returns a 'readable' – Flames own internal representation of what can be turned into a firestore document reference for reading from firestore
+await Person.get('id');
 ```
 
 ### Find
 ```javascript
-await Person.find([
-  ['where', 'name', '==', 'John']
-  // ...
-  // any number of constraints that can be used with firestore queries but for a single document only
-]).read();
+john = await Person.find(['firstName', '==', 'John'], ['lastName', '==', 'Doe']);
+// any number of constraints that can be used, but to identify a single document only
 ```
 
 ### List
 ```javascript
-await Person.list([
-  ['where', 'name', '>', 'J'],
-  ['order_by', 'name']
-  // any number of constraints that can be used with firestore queries
-  // prob should chat about this one, it needs to handle cursor based paging and firestore has some really odd quirks here
-], ['meta.id', 'val.name']).read();
-// results can 'pick' specific fields
-// list needs to return the collection 'page' of results, the first item in the collection, and the last item in the collection
+await Person.list(10, 2, ['name', '>', 'J'], ['order_by', 'name'], ['meta.id', 'val.name']);
+// returns at most 10 records, on page #2 (zero-based) - so starting from the 21st position.
+// results can 'pick' specific fields.
+// TODO: order-by and field-picking not implemented yet.
 ```
 
 ### Write Transaction
