@@ -13,11 +13,17 @@ class Fragments {
   ref = null;
   ext = null;
 
-  constructor(dao, validators, plainObj) {
+  constructor(dao, validators, type, id) {
     this.#dao = dao;
     this.#validators = validators;
     Util.perSection(section => this[section] = {});
-    Util.perSection(section => Object.keys(plainObj[section]).forEach(key => this[section][key] = plainObj[section][key]));
+    this.meta.type = type;
+    this.meta.id = id;
+  }
+
+  set(section, field, value) {
+    this[section][field] = value;
+    return this;
   }
 
   errors() {
@@ -40,14 +46,13 @@ class Fragments {
   }
 
   /*
-   * A plain JS object that is equivalent to this Fragments.
+   * Converts to a collapsed JS Object suitable for persistence.
    */
-  plainObject() {
-    const o = {};
-    Util.perSection(section => o[section] = {});
-    const encode = (section, key) => o[section][key] = this[section][key];
+  collapse() {
+    const obj = {};
+    const encode = (section, key) => obj[`${section}:${key}`] = this[section][key];
     Util.perSection(section => Object.keys(this[section]).forEach(key => encode(section, key)));
-    return o;
+    return obj;
   }
 };
 

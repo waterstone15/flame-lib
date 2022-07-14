@@ -117,7 +117,7 @@ await john.insert();
 
 ### Update
 ```javascript
-await john.update();
+await john.fragments().set("val", "name", "Jimmy").update();
 ```
 
 ### Upsert

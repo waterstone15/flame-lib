@@ -32,25 +32,26 @@ class Dao {
     if (!res.exists) {
       return null;
     }
-    return new Spark(this, validators, res.data());
+    const obj = Spark.expand(res.data());
+    return new Spark(this, validators, obj);
   }
 
   async find(type, validators, filters) {
     const collection = this.#collection(type);
     const doc = this.#db.collection(collection);
 
-    var query = doc.where("meta.type", "==", type);
+    var query = doc.where("meta:type", "==", type);
     filters.forEach(filter => {
       // query = query.where(filter.field, filter.op, filter.value);
-      query = query.where(filter[0], filter[1], filter[2]);
+      query = query.where(`${filter[0]}:${filter[1]}`, filter[2], filter[3]);
     });
     const res = await query.get();
 
     if (res.empty) {
       return null;
     } else if (res.size == 1) {
-      const plainObject = res.docs[0].data();
-      return new Spark(this, validators, plainObject);
+      const obj = Spark.expand(res.docs[0].data());
+      return new Spark(this, validators, obj);
     } else {
       throw new FlameError(`More than one Sparks match the given filters`);
     }
@@ -60,21 +61,21 @@ class Dao {
     const collection = this.#collection(type);
     const doc = this.#db.collection(collection);
 
-    var query = doc.where("meta.type", "==", type);
+    var query = doc.where("meta:type", "==", type);
     filters.forEach(filter => {
       // query = query.where(filter.field, filter.op, filter.value);
-      query = query.where(filter[0], filter[1], filter[2]);
+      query = query.where(`${filter[0]}:${filter[1]}`, filter[2], filter[3]);
     });
     query = query.limit(pageSize).offset(pageSize * pageNo);
     const res = await query.get();
 
-    return res.docs.map(doc => new Spark(this, validators, doc.data()));
+    return res.docs.map(doc => new Spark(this, validators, Spark.expand(doc.data())));
   }
 
   async insert(spark) {
     const doc = this.#docRef(spark.meta);
     try {
-      await doc.create(spark.plainObject());
+      await doc.create(spark.collapse());
     } catch(err) {
       if (err.code === 6) { // "already-exists"
         throw new FlameError(`Spark '${spark.meta.id}' for shape '${spark.meta.type}' already exists`);
@@ -88,7 +89,7 @@ class Dao {
     const meta = fragments.meta;
     const doc = this.#docRef(meta);
     try {
-      await doc.update(fragments.plainObject());
+      await doc.update(fragments.collapse());
     } catch(err) {
       if (err.code === 5) { // "not-fouund"
         throw new FlameError(`Spark '${meta.id}' for shape '${meta.type}' not found`);
@@ -100,7 +101,7 @@ class Dao {
 
   async upsert(spark) {
     const doc = this.#docRef(spark.meta);
-    await doc.set(spark.plainObject());
+    await doc.set(spark.collapse());
   }
 
   async remove(type, id) {

@@ -44,16 +44,18 @@ describe("Spark", () => {
   });
 
   it("creates and updates and upserts", async () => {
-    const spark1 = shape.spark({ val: { firstName: "12", lastName: "xyz" } });
-    const spark2 = shape.spark({ val: { firstName: "ooooo", lastName: "aaaa" } });
-    spark2.meta.id = spark1.meta.id;
+    const spark = shape.spark({ val: { firstName: "12", lastName: "xyz" } });
+    const expected = shape.spark({ val: { firstName: "12", lastName: "aaaa" } });
+    expected.meta.id = spark.meta.id;
 
-    await expect(spark1.update()).rejects.toThrow(FlameError);
-    await spark1.upsert();
-    await spark1.upsert();
-    await spark2.update(); // changes firstName and lastName for spark1, since IDs are same.
-    await expect(spark1.insert()).rejects.toThrow(FlameError);
-    await expect(shape.get(spark1.meta.id)).resolves.toEqual(spark2); // verifies names were updated.
+    const fragments = await spark.fragments() // changes lastName for spark.
+      .set("val", "lastName", "aaaa");
+    await expect(fragments.update()).rejects.toThrow(FlameError); // spark not found
+    await spark.upsert();
+    await spark.upsert();
+    await fragments.update();
+    await expect(spark.insert()).rejects.toThrow(FlameError);
+    await expect(shape.get(spark.meta.id)).resolves.toEqual(expected); // verifies names were updated.
   });
 
   it("finds and lists", async () => {
@@ -61,16 +63,16 @@ describe("Spark", () => {
     const spark2 = shape.spark({ val: { firstName: "22", lastName: "xxx" } });
     const spark3 = shape.spark({ val: { firstName: "33", lastName: "xxx" } });
 
-    await expect(shape.find(["val.firstName", "==", "11"])).resolves.toBe(null);
-    await expect(shape.list(10, 0, ["val.lastName", "==", "xxx"])).resolves.toEqual([]);
+    await expect(shape.find(["val", "firstName", "==", "11"])).resolves.toBe(null);
+    await expect(shape.list(10, 0, ["val", "lastName", "==", "xxx"])).resolves.toEqual([]);
     await spark1.insert();
-    await expect(shape.find(["val.firstName", "==", "11"])).resolves.toEqual(spark1);
-    await expect(shape.list(10, 0, ["val.lastName", "==", "xxx"])).resolves.toEqual([spark1]);
+    await expect(shape.find(["val", "firstName", "==", "11"])).resolves.toEqual(spark1);
+    await expect(shape.list(10, 0, ["val", "lastName", "==", "xxx"])).resolves.toEqual([spark1]);
     await spark2.upsert();
     await spark3.insert();
-    await expect(shape.find(["val.firstName", "==", "22"])).resolves.toEqual(spark2);
-    await expect(shape.find(["val.firstName", "==", "33"])).resolves.toEqual(spark3);
-    const sparks = await shape.list(10, 0, ["val.lastName", "==", "xxx"]);
+    await expect(shape.find(["val", "firstName", "==", "22"])).resolves.toEqual(spark2);
+    await expect(shape.find(["val", "firstName", "==", "33"])).resolves.toEqual(spark3);
+    const sparks = await shape.list(10, 0, ["val", "lastName", "==", "xxx"]);
     expect(sparks.length).toEqual(3);
     expect(sparks).toEqual(expect.arrayContaining([spark1, spark2, spark3]));
   });
@@ -81,7 +83,7 @@ describe("Spark", () => {
     const spark3 = shape.spark({ val: { firstName: "33", lastName: "yyy" } });
     const spark4 = shape.spark({ val: { firstName: "44", lastName: "yyy" } });
     const spark5 = shape.spark({ val: { firstName: "55", lastName: "yyy" } });
-    const filter = ["val.lastName", "==", "yyy"];
+    const filter = ["val", "lastName", "==", "yyy"];
 
     await spark1.insert();
     await spark2.insert();

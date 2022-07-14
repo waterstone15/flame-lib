@@ -40,9 +40,8 @@ class Spark {
     await this.#dao.insert(this);
   }
 
-  async update() {
-    const fragments = new Fragments(this.#dao, this.#validators, this.plainObject());
-    await fragments.update();
+  fragments() {
+    return new Fragments(this.#dao, this.#validators, this.meta.type, this.meta.id);
   }
 
   async upsert() {
@@ -68,24 +67,24 @@ class Spark {
    * Converts to a collapsed JS Object suitable for persistence.
    */
   collapse() {
-    const json = {};
-    const encode = (section, key) => json[`${section}:${key}`] = this[section][key];
+    const obj = {};
+    const encode = (section, key) => obj[`${section}:${key}`] = this[section][key];
     Util.perSection(section => Object.keys(this[section]).forEach(key => encode(section, key)));
-    return json;
+    return obj;
   }
 
   /*
    * Converts a collapsed JS Object back into a Spark JS Object.
    */
-  static expand(json) {
+  static expand(obj) {
     const values = {};
     Util.perSection(section => values[section] = {});
 
     const decode = (encodedKey) => {
       const [section, key] = encodedKey.split(":");
-      values[section][key] = json[encodedKey];
+      values[section][key] = obj[encodedKey];
     }
-    Object.keys(json).forEach(key => decode(key));
+    Object.keys(obj).forEach(key => decode(key));
 
     return values;
   }
