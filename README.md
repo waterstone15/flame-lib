@@ -76,11 +76,15 @@ await flame.quench('other');
 ```javascript
 Person = Flame.shape("Person", {
   val: {
-    name: null,
+    firstName: null,  // a raw field
+    lastName: null,  // a raw field
+    fullName: s => `${s.val.firstName} ${s.val.lastName}`,  // a derived field (based on raw fields)
   },
   ok: {
     val: {
-      name: (v) => !isEmpty(v) && isString(v),
+      firstName: (v) => !isEmpty(v) && isString(v),
+      lastName: (v) => !isEmpty(v) && isString(v),
+      // derived fields don't have a corresponding validator
     },
   },
 });
