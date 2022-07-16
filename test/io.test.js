@@ -27,11 +27,15 @@ describe("Spark", () => {
   beforeEach(async () => {
     flame = await Flame.ignite("X", cfg, dbURL);
     shape = flame.shape("sh4pe", {
-      val: { firstName: null, lastName: null },
+      val: {
+        firstName: null,
+        lastName: null,
+        fullName: s => `${s.val.firstName} ${s.val.lastName}`,
+      },
       ok: {
         val: {
-          firstName: (v) => typeof v === "string" && v.length > 2,
-          lastName: (v) => typeof v === "string" && v.length > 2,
+          firstName: v => typeof v === "string" && v.length > 2,
+          lastName: v => typeof v === "string" && v.length > 2,
         },
       }
     });
@@ -121,5 +125,15 @@ describe("Spark", () => {
         { val: { firstName: "33" }, meta: {}, ref: {}, ext: {} },
         { val: { firstName: "44" }, meta: {}, ref: {}, ext: {} },
       ]);
+  });
+
+  it("hadndles derived fields", async () => {
+    const spark = shape.spark({ val: { firstName: "11", lastName: "www" } });
+
+    await spark.insert();
+    const actual = await shape.get(spark.meta.id);
+
+    expect(actual.val.fullName).toEqual("11 www");
+    expect(actual).toEqual(like(spark));
   });
 });

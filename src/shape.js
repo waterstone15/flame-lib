@@ -53,14 +53,6 @@ class Shape {
       throw new FlameError(`'type' is a reserved attribute for 'meta' section of Flame spec`);
     }
 
-    // verify 'ok' for every field:
-    const check = (section, key) => {
-      if (typeof (ok[section] ?? {})[key] !== "function") {
-        throw new FlameError(`'ok.${section}.${key}' of Flame spec must be a function`);
-      }
-    };
-    Util.perSection(section => Object.keys(defaults[section]).forEach((k) => check(section, k)));
-
     // normalize all defaults to be functions:
     const normalize = (spec, key) => {
       const v = spec[key];
@@ -70,6 +62,14 @@ class Shape {
       const s = defaults[section];
       Object.keys(s).forEach((k) => normalize(s, k));
     });
+
+    // verify 'ok' for every field:
+    const check = (section, key) => {
+      if (defaults[section][key].length == 0 && typeof (ok[section] ?? {})[key] !== "function") {
+        throw new FlameError(`'ok.${section}.${key}' of Flame spec must be a function`);
+      }
+    };
+    Util.perSection(section => Object.keys(defaults[section]).forEach((k) => check(section, k)));
 
     return new Shape(this.#dao, type, defaults, ok);
   }
@@ -87,13 +87,19 @@ class Shape {
       if (!(k in this.#defaults[section])) throw new FlameError(`Unexpected key '${section}.${k}'`);
     }));
 
-    // Initialize all fields:
+    // Initialize all raw fields:
     const values = {};
     Util.perSection(section => {
       const defaults = this.#defaults[section];
       const s = {...from[section] ?? {}};
-      Object.keys(defaults).forEach((k) => s[k] = k in s ? s[k] : defaults[k]());
+      Object.keys(defaults).filter(k => defaults[k].length == 0).forEach(k => s[k] = k in s ? s[k] : defaults[k]());
       values[section] = s;
+    });
+    // Initialize all derived fields:
+    Util.perSection(section => {
+      const defaults = this.#defaults[section];
+      const s = values[section];
+      Object.keys(defaults).filter(k => defaults[k].length == 1).forEach(k => s[k] = defaults[k](values));
     });
 
     return new Spark(this.#dao, this.#ok, values);
