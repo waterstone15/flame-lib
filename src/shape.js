@@ -5,6 +5,10 @@ const Util = require("./util");
 const FlameError = require("./errors");
 
 
+const nonEmptyString = (v) => typeof v === "string" && v.length > 0;
+const iso8601String = (v) => typeof v === "string" && !Object.is(Date.parse(v), NaN);
+
+
 class Shape {
   static base(flame) {
     const defaults = {}, ok = {};
@@ -26,9 +30,13 @@ class Shape {
 
     this.#defaults.meta.type = () => this.#type;
     this.#defaults.meta.id = () => `${this.#type}:${uuid.v4()}`;
+    this.#defaults.meta.createdAt = () => (new Date(0)).toISOString();
+    this.#defaults.meta.modifiedAt = () => (new Date(0)).toISOString();
 
-    this.#ok.meta.type = (v) => typeof v === "string" && v.length > 0;
-    this.#ok.meta.id = (v) => typeof v === "string" && v.length > 0;
+    this.#ok.meta.type = nonEmptyString;
+    this.#ok.meta.id = nonEmptyString;
+    this.#ok.meta.createdAt = iso8601String;
+    this.#ok.meta.modifiedAt = iso8601String;
   }
 
   extend(type, spec) {
@@ -64,6 +72,10 @@ class Shape {
     });
 
     return new Shape(this.#dao, type, defaults, ok);
+  }
+
+  fragments(sparkId) {
+    return new Fragments(this.#dao, this.#ok, this.type, sparkId);
   }
 
   /*

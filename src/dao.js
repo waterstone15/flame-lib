@@ -1,6 +1,5 @@
 const pluralize = require("pluralize");
 const casing = require("change-case");
-const fs = require("firebase-admin/firestore");
 
 const Spark = require("./spark");
 const FlameError = require("./errors");
@@ -14,9 +13,9 @@ class Dao {
   #db = null;
   #pluralize = null;
 
-  constructor(fbApp, pluralize) {
+  constructor(fbApp, db, pluralize) {
     this.#fbApp = fbApp;
-    this.#db = fs.getFirestore(this.#fbApp);
+    this.#db = db;
     this.#pluralize = pluralize;
   }
 
@@ -75,14 +74,18 @@ class Dao {
     query = query.limit(pageSize).offset(pageSize * pageNo);
     const res = await query.get();
     const docs = res.docs.map(doc => Spark.expand(doc.data()));
-
+    // TODO: use withConverter - https://googleapis.dev/nodejs/firestore/latest/Query.html#withConverter
     return fields !== null ? docs : docs.map(doc => new Spark(this, validators, doc));
   }
 
   async insert(spark) {
     const doc = this.#docRef(spark.meta);
     try {
-      await doc.create(spark.collapse());
+      const obj = spark.collapse();
+      const nowIso8601 = (new Date()).toISOString();
+      obj["meta:createdAt"] = nowIso8601;
+      obj["meta:modifiedAt"] = nowIso8601;
+      await doc.create(obj);
     } catch(err) {
       if (err.code === 6) { // "already-exists"
         throw new FlameError(`Spark '${spark.meta.id}' for shape '${spark.meta.type}' already exists`);
@@ -96,7 +99,9 @@ class Dao {
     const meta = fragments.meta;
     const doc = this.#docRef(meta);
     try {
-      await doc.update(fragments.collapse());
+      const obj = fragments.collapse();
+      obj["meta:modifiedAt"] = (new Date()).toISOString();
+      await doc.update(obj);
     } catch(err) {
       if (err.code === 5) { // "not-fouund"
         throw new FlameError(`Spark '${meta.id}' for shape '${meta.type}' not found`);
@@ -108,7 +113,11 @@ class Dao {
 
   async upsert(spark) {
     const doc = this.#docRef(spark.meta);
-    await doc.set(spark.collapse());
+    const obj = spark.collapse();
+    const nowIso8601 = (new Date()).toISOString();
+    obj["meta:createdAt"] = nowIso8601;
+    obj["meta:modifiedAt"] = nowIso8601;
+    await doc.set(obj);
   }
 
   async remove(type, id) {

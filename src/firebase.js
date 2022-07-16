@@ -1,4 +1,5 @@
 const fba = require("firebase-admin");
+const fs = require("firebase-admin/firestore");
 const base64 = require("@stablelib/base64");
 
 
@@ -9,7 +10,9 @@ const base64 = require("@stablelib/base64");
 class FirebaseApp {
   static async create(config, dbURL) {
     const fbCfg = FirebaseApp.#firebaseConfig(config, dbURL);
-    return fba.initializeApp(fbCfg);
+    const fbApp = fba.initializeApp(fbCfg);
+    const db = fs.getFirestore(fbApp);
+    return [fbApp, db];
   }
 
   static #firebaseConfig(config, dbURL) {

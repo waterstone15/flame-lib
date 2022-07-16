@@ -9,11 +9,11 @@ const dbURL = process.env.FIREBASE_DATABASE_URL;
 describe("Flame", () => {
   flame = null;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     flame = await Flame.ignite("F1", cfg, dbURL);
   })
 
-  afterAll(async () => {
+  afterEach(async () => {
      await Flame.quench("F1");
   });
 
