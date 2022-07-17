@@ -14,14 +14,15 @@ const like = (spark) => {
       createdAt: expect.anything(),
       modifiedAt: expect.anything(),
     },
-    val: spark.val,
-    ref: spark.ref,
-    ext: spark.ext,
+    val: {...spark.val},
+    ref: {...spark.ref},
+    ext: {...spark.ext},
   };
 };
 
 
 describe("Spark", () => {
+  flame = null;
   shape = null;
 
   beforeEach(async () => {
@@ -135,5 +136,27 @@ describe("Spark", () => {
 
     expect(actual.val.fullName).toEqual("11 www");
     expect(actual).toEqual(like(spark));
+  });
+
+  it("handles batch-writes", async () => {
+    const spark1 = shape.spark({ val: { firstName: "abcd", lastName: "xyzt" } });
+    const fragments1 = spark1.fragments().set("val", "lastName", "aaaa"); // changes lastName for spark.
+    const spark2 = shape.spark({ val: { firstName: "weee", lastName: "fooo" } });
+    const expected1 = like(spark1);
+    expected1.val.lastName = "aaaa";
+    const expected2 = like(spark2);
+
+    await spark2.insert();
+    await expect(shape.get(spark2.meta.id)).resolves.toEqual(expected2);
+
+    await flame.writeBatch()
+      .insert(spark1)
+      .upsert(spark1)
+      .remove(spark2)
+      .update(fragments1)
+      .commit();
+
+    await expect(shape.get(spark1.meta.id)).resolves.toEqual(expected1);
+    await expect(shape.get(spark2.meta.id)).resolves.toEqual(null);
   });
 });

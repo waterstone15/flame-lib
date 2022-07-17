@@ -159,12 +159,12 @@ await Person.list(
 
 ### Write Transaction
 ```javascript
-await Flame.write([
-  a.save()
-  b.update()
-  c.del()
+await Flame.batch()
+  .insert(sparkA)
+  .update(sparkB.fragments().set("val", "firstName", "Martin"))
+  .remove(sparkC)
+  .commit();
 ]);
-// save, update, and del all return 'writables' which Flame.write then converts into a firestore write batch
 ```
 
 

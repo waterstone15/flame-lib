@@ -1,5 +1,6 @@
 const FlameError = require("./errors");
 const Shape = require("./shape");
+const Batch = require("./batch");
 
 
 /*
@@ -24,8 +25,8 @@ class Flame {
     return this.#baseShape.extend(name, spec);
   }
 
-  write(...writables) {
-    throw new FlameError(`Not implemented!`);
+  writeBatch() {
+    return new Batch(this.#dao);
   }
 
   wildfire() {

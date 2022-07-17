@@ -95,6 +95,15 @@ class Dao {
     }
   }
 
+  batchInsert(fsBatch, spark) {
+    const doc = this.#docRef(spark.meta);
+    const obj = spark.collapse();
+    const nowIso8601 = (new Date()).toISOString();
+    obj["meta:createdAt"] = nowIso8601;
+    obj["meta:modifiedAt"] = nowIso8601;
+    fsBatch.create(doc, obj);
+  }
+
   async update(fragments) {
     const meta = fragments.meta;
     const doc = this.#docRef(meta);
@@ -111,6 +120,14 @@ class Dao {
     }
   }
 
+  batchUpdate(fsBatch, fragments) {
+    const meta = fragments.meta;
+    const doc = this.#docRef(meta);
+    const obj = fragments.collapse();
+    obj["meta:modifiedAt"] = (new Date()).toISOString();
+    fsBatch.update(doc, obj);
+  }
+
   async upsert(spark) {
     const doc = this.#docRef(spark.meta);
     const obj = spark.collapse();
@@ -120,11 +137,45 @@ class Dao {
     await doc.set(obj);
   }
 
+  batchUpsert(fsBatch, spark) {
+    const doc = this.#docRef(spark.meta);
+    const obj = spark.collapse();
+    const nowIso8601 = (new Date()).toISOString();
+    obj["meta:createdAt"] = nowIso8601;
+    obj["meta:modifiedAt"] = nowIso8601;
+    fsBatch.set(doc, obj);
+  }
+
   async remove(type, id) {
     const collection = this.#collection(type);
     const doc = this.#db.collection(collection).doc(id);
 
     await doc.delete();
+  }
+
+  batchRemove(fsBatch, type, id) {
+    const collection = this.#collection(type);
+    const doc = this.#db.collection(collection).doc(id);
+    fsBatch.delete(doc);
+  }
+
+  async writeBatch(b) {
+    const fsBatch = this.#db.batch();
+    b.writes().forEach(w => {
+      const op = w[0];
+      if (op === "insert") {
+        this.batchInsert(fsBatch, w[1]);
+      } else if (op === "upsert") {
+        this.batchUpsert(fsBatch, w[1]);
+      } else if (op === "update") {
+        this.batchUpdate(fsBatch, w[1]);
+      } else if (op === "remove") {
+        this.batchRemove(fsBatch, w[1], w[2]);
+      } else {
+        throw new FlameError(`Unknown batch-write operation '${op}'`);
+      }
+    });
+    await fsBatch.commit();
   }
 
   #docRef(meta) {
