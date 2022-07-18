@@ -6,6 +6,12 @@
   "repository": "git@github.com:waterstone15/flame-orm.git",
   "author": "Brian Waterstone <code@waterstone15.com>",
   "license": "MIT",
+  "exports": {
+    ".": {
+      "import": "./src/flame-lib.js",
+      "require": "./build/node/flame-lib.js"
+    }
+  },
   "scripts": {
     "test": "jest"
   },
