@@ -4,7 +4,7 @@ const Flame = require("./registry.js");
 const VERSION = "0.0.1";
 
 
-export {
+module.exports = {
   VERSION,
   Flame,
 };
