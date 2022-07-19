@@ -9,7 +9,7 @@
   "exports": {
     ".": {
       "import": "./src/flame-lib.js",
-      "require": "./build/node/flame-lib.js"
+      "require": "./src/flame-lib.js"
     }
   },
   "scripts": {
