@@ -8,9 +8,9 @@ const base64 = require("@stablelib/base64");
  * Internal-only to Flame; not intended to be used directly by Flame's clients.
  */
 class FirebaseApp {
-  static async create(config, dbURL) {
+  static async create(name, config, dbURL) {
     const fbCfg = FirebaseApp.#firebaseConfig(config, dbURL);
-    const fbApp = fba.initializeApp(fbCfg);
+    const fbApp = fba.initializeApp(fbCfg, name);
     const db = fs.getFirestore(fbApp);
     return [fbApp, db];
   }
