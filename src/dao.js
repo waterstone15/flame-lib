@@ -66,7 +66,7 @@ class Dao {
       query = query.where(`${filter[0]}:${filter[1]}`, filter[2], filter[3]);
     });
     if (orderBy !== null) {
-      query = query.orderBy(...orderBy);
+      query = query.orderBy(orderBy);
     }
     if (fields !== null) {
       query = query.select(...fields);
