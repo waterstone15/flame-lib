@@ -118,7 +118,7 @@ class Shape {
   }
 
   async remove(id) {
-    await this.#dao.remove(id);
+    await this.#dao.remove(this.#type, id);
   }
 
   /*
