@@ -3,9 +3,12 @@
   "version": "0.0.1",
   "description": "A data model and query library for Firestore.",
   "main": "index.js",
-  "repository": "git@github.com:waterstone15/flame-orm.git",
+  "repository": "git@github.com:waterstone15/flame-lib.git",
   "author": "Brian Waterstone <code@waterstone15.com>",
   "license": "MIT",
+  "engines": {
+    "yarn": "1"
+  },
   "exports": {
     ".": {
       "import": "./src/flame-lib.js",
@@ -21,6 +24,7 @@
   "private": false,
   "dependencies": {
     "@stablelib/base64": "^1.0.1",
+    "@stablelib/random": "^1.0.1",
     "change-case": "^4.1.2",
     "firebase": "^9.8.2",
     "firebase-admin": "^10.2.0",

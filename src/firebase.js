@@ -17,9 +17,9 @@ class FirebaseApp {
 
   static #firebaseConfig(config, dbURL) {
     return {
-      // credential: fba.credential.cert(config),
+      credential: fba.credential.cert(config),
       databaseURL: dbURL,
-      ...config,
+      // ...config,
     };
   }
 };

@@ -3,15 +3,16 @@ const FlameError = require("./errors");
 
 
 /*
- * Fragments of a Flame Spark, for doing partial updates to a Spark.
+ * Fragment of a Flame Spark, for doing partial updates to a Spark.
  */
-class Fragments {
+class Fragment {
   #dao = null;
   #validators = null;
-  meta = null;
-  val = null;
-  ref = null;
   ext = null;
+  index = null;
+  meta = null;
+  ref = null;
+  val = null;
 
   constructor(dao, validators, type, id) {
     this.#dao = dao;
@@ -21,8 +22,14 @@ class Fragments {
     this.meta.id = id;
   }
 
-  set(section, field, value) {
-    this[section][field] = value;
+  set(obj) {
+    console.log(obj)
+    Util.perSection(section => {
+      this[section] = {
+        ...this[section],
+        ...obj[section],
+      };
+    });
     return this;
   }
 
@@ -46,15 +53,17 @@ class Fragments {
   }
 
   /*
-   * Converts to a collapsed JS Object suitable for persistence.
+   * A plain JS object that is equivalent to this Fragment.
    */
-  collapse() {
+  plainObject() {
     const obj = {};
-    const encode = (section, key) => obj[`${section}:${key}`] = this[section][key];
+    Util.perSection(section => obj[section] = {});
+    const encode = (section, key) => obj[section][key] = this[section][key];
     Util.perSection(section => Object.keys(this[section]).forEach(key => encode(section, key)));
     return obj;
   }
+
 };
 
 
-module.exports = Fragments;
+module.exports = Fragment;

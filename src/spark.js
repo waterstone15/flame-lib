@@ -1,4 +1,4 @@
-const Fragments = require("./fragments");
+// const Fragment = require("./fragment");
 const Util = require("./util");
 const FlameError = require("./errors");
 
@@ -40,9 +40,9 @@ class Spark {
     await this.#dao.insert(this);
   }
 
-  fragments() {
-    return new Fragments(this.#dao, this.#validators, this.meta.type, this.meta.id);
-  }
+  // fragment() {
+  //   return new Fragment(this.#dao, this.#validators, this.meta.type, this.meta.id);
+  // }
 
   async upsert() {
     await this.#dao.upsert(this);
@@ -56,38 +56,13 @@ class Spark {
    * A plain JS object that is equivalent to this Spark.
    */
   plainObject() {
-    const o = {};
-    Util.perSection(section => o[section] = {});
-    const encode = (section, key) => o[section][key] = this[section][key];
-    Util.perSection(section => Object.keys(this[section]).forEach(key => encode(section, key)));
-    return o;
-  }
-
-  /*
-   * Converts to a collapsed JS Object suitable for persistence.
-   */
-  collapse() {
     const obj = {};
-    const encode = (section, key) => obj[`${section}:${key}`] = this[section][key];
+    Util.perSection(section => obj[section] = {});
+    const encode = (section, key) => obj[section][key] = this[section][key];
     Util.perSection(section => Object.keys(this[section]).forEach(key => encode(section, key)));
     return obj;
   }
 
-  /*
-   * Converts a collapsed JS Object back into a Spark JS Object.
-   */
-  static expand(obj) {
-    const values = {};
-    Util.perSection(section => values[section] = {});
-
-    const decode = (encodedKey) => {
-      const [section, key] = encodedKey.split(":");
-      values[section][key] = obj[encodedKey];
-    }
-    Object.keys(obj).forEach(key => decode(key));
-
-    return values;
-  }
 };
 
 

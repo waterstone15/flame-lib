@@ -27,8 +27,8 @@ class Batch {
     return this;
   }
 
-  update(fragments) {
-    this.#writes.push(["update", fragments]);
+  update(fragment) {
+    this.#writes.push(["update", fragment]);
     return this;
   }
 

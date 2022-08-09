@@ -4,7 +4,7 @@
 </p>
 <p align="center">
   A data model and query library for Firestore.
-</>
+</p>
 <br>
 <br>
 <hr style='height: 1px;'/>
@@ -30,29 +30,16 @@ Usage:
 
 ### Ignite
 ```javascript
-flame = require('flame-lib');
+flame = (require('flame-lib').Flame;
 
-const cert = JSON.parse(Buffer.from(process.env.FIREBASE_CONFIG_BASE64, 'base64').toString());
 const dbURL = process.env.FIREBASE_DATABASE_URL;
+const cfg = JSON.parse(process.env.FIREBASE_CONFIG);  // FIREBASE_CONFIG is the firebase admin service account stored as a JSON string.
 
-
-Flame = await flame.ignite('main', {}, dbURL);
-// For use with firebase functions (auto load) with no credential, and no name.
-
-// flame itself should be a singleton. if it is required over and over in the same process (web server), each flame = require 'flame-lib' should return the same object.
-
-FlameOther = await flame.ignite(
-  'other',
-  {
-    credential: '...' # .json | base64
-  }
-);
+var Flame = await flame.ignite('main', cfg, db_url);
 ```
 
 ### Hold
 ```javascript
-flame = require('flame-lib');
-
 Flame = flame.hold();
 // => retrieves previously ignited Flame instance using 'default' firestore app.
 
@@ -63,8 +50,6 @@ FlameOther = flame.hold('other');
 
 ### Quench
 ```javascript
-flame = require('flame-lib');
-
 await flame.quench();
 // => releases resources for previously ignited Flame using 'default' firestore app.
 

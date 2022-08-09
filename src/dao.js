@@ -2,6 +2,7 @@ const pluralize = require("pluralize");
 const casing = require("change-case");
 
 const Spark = require("./spark");
+const Util = require("./util");
 const FlameError = require("./errors");
 
 
@@ -31,7 +32,7 @@ class Dao {
     if (!res.exists) {
       return null;
     }
-    const obj = Spark.expand(res.data());
+    const obj = Util.expand(res.data());
     return new Spark(this, validators, obj);
   }
 
@@ -49,7 +50,7 @@ class Dao {
     if (res.empty) {
       return null;
     } else if (res.size == 1) {
-      const obj = Spark.expand(res.docs[0].data());
+      const obj = Util.expand(res.docs[0].data());
       return new Spark(this, validators, obj);
     } else {
       throw new FlameError(`More than one Sparks match the given filters`);
@@ -73,7 +74,7 @@ class Dao {
     }
     query = query.limit(pageSize).offset(pageSize * pageNo);
     const res = await query.get();
-    const docs = res.docs.map(doc => Spark.expand(doc.data()));
+    const docs = res.docs.map(doc => Util.expand(doc.data()));
     // TODO: use withConverter - https://googleapis.dev/nodejs/firestore/latest/Query.html#withConverter
     return fields !== null ? docs : docs.map(doc => new Spark(this, validators, doc));
   }
@@ -81,10 +82,10 @@ class Dao {
   async insert(spark) {
     const doc = this.#docRef(spark.meta);
     try {
-      const obj = spark.collapse();
+      const obj = Util.collapse(spark.plainObject());
       const nowIso8601 = (new Date()).toISOString();
-      obj["meta:createdAt"] = nowIso8601;
-      obj["meta:modifiedAt"] = nowIso8601;
+      obj["meta:created-at"] = nowIso8601;
+      obj["meta:updated-at"] = nowIso8601;
       await doc.create(obj);
     } catch(err) {
       if (err.code === 6) { // "already-exists"
@@ -97,19 +98,19 @@ class Dao {
 
   batchInsert(fsBatch, spark) {
     const doc = this.#docRef(spark.meta);
-    const obj = spark.collapse();
+    const obj = Util.collapse(spark.plainObject());
     const nowIso8601 = (new Date()).toISOString();
-    obj["meta:createdAt"] = nowIso8601;
-    obj["meta:modifiedAt"] = nowIso8601;
+    obj["meta:created-at"] = nowIso8601;
+    obj["meta:updated-at"] = nowIso8601;
     fsBatch.create(doc, obj);
   }
 
-  async update(fragments) {
-    const meta = fragments.meta;
+  async update(fragment) {
+    const meta = fragment.meta;
     const doc = this.#docRef(meta);
     try {
-      const obj = fragments.collapse();
-      obj["meta:modifiedAt"] = (new Date()).toISOString();
+      const obj = Util.collapse(fragment.plainObject());
+      obj["meta:updated-at"] = (new Date()).toISOString();
       await doc.update(obj);
     } catch(err) {
       if (err.code === 5) { // "not-fouund"
@@ -120,29 +121,29 @@ class Dao {
     }
   }
 
-  batchUpdate(fsBatch, fragments) {
-    const meta = fragments.meta;
+  batchUpdate(fsBatch, fragment) {
+    const meta = fragment.meta;
     const doc = this.#docRef(meta);
-    const obj = fragments.collapse();
-    obj["meta:modifiedAt"] = (new Date()).toISOString();
+    const obj = Util.collapse(fragment.plainObject());
+    obj["meta:updated-at"] = (new Date()).toISOString();
     fsBatch.update(doc, obj);
   }
 
   async upsert(spark) {
     const doc = this.#docRef(spark.meta);
-    const obj = spark.collapse();
+    const obj = Util.collapse(spark.plainObject());
     const nowIso8601 = (new Date()).toISOString();
-    obj["meta:createdAt"] = nowIso8601;
-    obj["meta:modifiedAt"] = nowIso8601;
+    obj["meta:created-at"] = nowIso8601;
+    obj["meta:updated-at"] = nowIso8601;
     await doc.set(obj);
   }
 
   batchUpsert(fsBatch, spark) {
     const doc = this.#docRef(spark.meta);
-    const obj = spark.collapse();
+    const obj = Util.collapse(spark.plainObject());
     const nowIso8601 = (new Date()).toISOString();
-    obj["meta:createdAt"] = nowIso8601;
-    obj["meta:modifiedAt"] = nowIso8601;
+    obj["meta:created-at"] = nowIso8601;
+    obj["meta:updated-at"] = nowIso8601;
     fsBatch.set(doc, obj);
   }
 

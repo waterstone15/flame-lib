@@ -11,8 +11,8 @@ const like = (spark) => {
     meta: {
       id: spark.meta.id,
       type: spark.meta.type,
-      createdAt: expect.anything(),
-      modifiedAt: expect.anything(),
+      created_at: expect.anything(),
+      modified_at: expect.anything(),
     },
     val: {...spark.val},
     ref: {...spark.ref},

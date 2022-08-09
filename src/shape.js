@@ -1,8 +1,11 @@
+const random = require("@stablelib/random");
 const uuid = require("uuid");
+var { paramCase } = require('change-case')
 
+const FlameError = require("./errors");
+const Fragment = require("./fragment");
 const Spark = require("./spark");
 const Util = require("./util");
-const FlameError = require("./errors");
 
 
 const nonEmptyString = (v) => typeof v === "string" && v.length > 0;
@@ -24,19 +27,19 @@ class Shape {
 
   constructor(dao, type, defaults, ok) {
     this.#dao = dao;
-    this.#type = type;
+    this.#type = paramCase(type);
     this.#defaults = defaults;
     this.#ok = ok;
 
     this.#defaults.meta.type = () => this.#type;
-    this.#defaults.meta.id = () => `${this.#type}:${uuid.v4()}`;
-    this.#defaults.meta.createdAt = () => (new Date(0)).toISOString();
-    this.#defaults.meta.modifiedAt = () => (new Date(0)).toISOString();
+    this.#defaults.meta.id = () => `${this.#type}-${random.randomString(32)}`;
+    this.#defaults.meta.created_at = () => (new Date()).toISOString();
+    this.#defaults.meta.updated_at = () => (new Date()).toISOString();
 
     this.#ok.meta.type = nonEmptyString;
     this.#ok.meta.id = nonEmptyString;
-    this.#ok.meta.createdAt = iso8601String;
-    this.#ok.meta.modifiedAt = iso8601String;
+    this.#ok.meta.created_at = iso8601String;
+    this.#ok.meta.updated_at = iso8601String;
   }
 
   extend(type, spec) {
@@ -74,8 +77,15 @@ class Shape {
     return new Shape(this.#dao, type, defaults, ok);
   }
 
-  fragments(sparkId) {
-    return new Fragments(this.#dao, this.#ok, this.type, sparkId);
+  fragment(sparkId, obj) {
+    console.log('hello')
+    console.log(this)
+    console.log(this.#type)
+    var f = new Fragment(this.#dao, this.#ok, this.#type, sparkId);
+    if (obj) {
+      f.set(obj)
+    }
+    return f
   }
 
   /*
@@ -124,17 +134,17 @@ class Shape {
   /*
    * Converts a Spark to the internal Json format suitable for persistence.
    */
-  toInternalJson(spark) {
-    return spark.collapse();
-  }
+  // toInternalJson(spark) {
+  //   return spark.collapse();
+  // }
 
   /*
    * Converts back into a Spark from the internal Json format from the persistence layer.
    */
-  fromInternalJson(json) {
-    const values = Spark.expand(json);
-    return new Spark(this.#dao, this.#ok, values);
-  }
+  // fromInternalJson(json) {
+  //   const values = Spark.expand(json);
+  //   return new Spark(this.#dao, this.#ok, values);
+  // }
 }
 
 

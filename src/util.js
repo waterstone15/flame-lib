@@ -1,3 +1,4 @@
+var { paramCase, snakeCase } = require('change-case');
 
 
 class Util {
@@ -6,11 +7,38 @@ class Util {
    * This exists in order to minimize the number of places that have to know the full set of sections.
    */
   static perSection(callback) {
-    callback("meta");
-    callback("val");
-    callback("ref");
     callback("ext");
+    callback("index");
+    callback("meta");
+    callback("ref");
+    callback("val");
   }
+
+  /*
+   * Converts an expanded JS object (from Flame) to a collapsed JS object (for Firestore).
+   */
+  static collapse(obj) {
+    const _obj = {};
+    const encode = (section, key) => _obj[`${section}:${paramCase(key)}`] = obj[section][key];
+    Util.perSection(section => Object.keys(obj[section]).forEach(key => encode(section, key)));
+    return _obj;
+  }
+
+  /*
+   * Converts a collapsed JS object (from Firestore) to an expanded JS object (for Flame).
+   */
+  static expand(obj) {
+    const _obj = {};
+    Util.perSection(section => _obj[section] = {});
+
+    const decode = (encodedKey) => {
+      const [section, key] = encodedKey.split(":");
+      _obj[section][snakeCase(key)] = obj[encodedKey];
+    }
+    Object.keys(obj).forEach(key => decode(key));
+    return _obj;
+  }
+
 };
 
 

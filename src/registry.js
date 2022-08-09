@@ -12,11 +12,11 @@ class Registry {
 
   static async ignite(name, config, dbURL) {
     if (name in Registry.#instances) {
-      throw new FlameError(`Flame already exists for name '${name}'`);
+      return null
     }
 
     const [fbApp, db] = await Fb.create(name, config, dbURL);
-    const pluralize = config.pluralize ?? false;
+    const pluralize = config.pluralize ?? true;
     const dao = new Dao(fbApp, db, pluralize);
     Registry.#instances[name] = new Flame(dao);
     return Registry.#instances[name];
@@ -24,7 +24,7 @@ class Registry {
 
   static hold(name) {
     if (!(name in Registry.#instances)) {
-      throw new FlameError(`Flame not found for name '${name}''`);
+      return null
     }
 
     return Registry.#instances[name];
