@@ -8,15 +8,16 @@ const cfg = JSON.parse(Buffer.from(process.env.FIREBASE_CONFIG_BASE64, 'base64')
 const dbURL = process.env.FIREBASE_DATABASE_URL;
 const like = (spark) => {
   return {
+    ext: {...spark.ext},
+    index: {...spark.index},
     meta: {
       id: spark.meta.id,
       type: spark.meta.type,
       created_at: expect.anything(),
       modified_at: expect.anything(),
     },
-    val: {...spark.val},
     ref: {...spark.ref},
-    ext: {...spark.ext},
+    val: {...spark.val},
   };
 };
 
@@ -121,10 +122,10 @@ describe("Spark", () => {
 
     await expect(shape.list(10, 0, ["val:firstName"], ["val:firstName"], ["val", "lastName", "==", "zzz"]))
       .resolves.toEqual([
-        { val: { firstName: "11" }, meta: {}, ref: {}, ext: {} },
-        { val: { firstName: "22" }, meta: {}, ref: {}, ext: {} },
-        { val: { firstName: "33" }, meta: {}, ref: {}, ext: {} },
-        { val: { firstName: "44" }, meta: {}, ref: {}, ext: {} },
+        { val: { firstName: "11" }, meta: {}, ref: {}, ext: {}, index: {} },
+        { val: { firstName: "22" }, meta: {}, ref: {}, ext: {}, index: {} },
+        { val: { firstName: "33" }, meta: {}, ref: {}, ext: {}, index: {} },
+        { val: { firstName: "44" }, meta: {}, ref: {}, ext: {}, index: {} },
       ]);
   });
 

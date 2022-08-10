@@ -1,4 +1,10 @@
-// const Fragment = require("./fragment");
+var isArray = require("lodash/isArray");
+var isFunction = require("lodash/isFunction");
+var reduce = require("lodash/reduce");
+var intersection = require("lodash/intersection");
+var { paramCase } = require("change-case");
+var { snakeCase } = require("change-case");
+
 const Util = require("./util");
 const FlameError = require("./errors");
 
@@ -9,16 +15,17 @@ const FlameError = require("./errors");
 class Spark {
   #dao = null;
   #validators = null;
-  meta = null;
-  val = null;
-  ref = null;
   ext = null;
+  index = null;
+  meta = null;
+  ref = null;
+  val = null;
 
   constructor(dao, validators, plainObj) {
     this.#dao = dao;
     this.#validators = validators;
     Util.perSection(section => this[section] = {});
-    Util.perSection(section => Object.keys(plainObj[section]).forEach(key => this[section][key] = plainObj[section][key]));
+    Util.perSection(section => Object.keys(plainObj[section]).forEach(key => this[section][snakeCase(key)] = plainObj[section][key]));
   }
 
   errors() {
@@ -32,17 +39,23 @@ class Spark {
     return ret;
   }
 
-  ok() {
-    return this.errors().length == 0;
+  ok(fields) {
+    var af = Util.allFields(this.plainObject())
+    fields = isArray(fields) ? intersection(fields, af) : af;
+
+    var ok = reduce(fields, (acc, field, index) => {
+      var [section, key] = field.split(':')
+      key = snakeCase(key)
+      var validate = this.#validators[section][key]
+      return isFunction(validate) ? (acc && validate(this[section][key])) : false;
+    }, true)
+
+    return ok
   }
 
   async insert() {
     await this.#dao.insert(this);
   }
-
-  // fragment() {
-  //   return new Fragment(this.#dao, this.#validators, this.meta.type, this.meta.id);
-  // }
 
   async upsert() {
     await this.#dao.upsert(this);

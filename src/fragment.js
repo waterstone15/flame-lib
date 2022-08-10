@@ -23,7 +23,6 @@ class Fragment {
   }
 
   set(obj) {
-    console.log(obj)
     Util.perSection(section => {
       this[section] = {
         ...this[section],

@@ -210,29 +210,4 @@ describe("Spark", () => {
     });
   });
 
-  // it("converts to internal json", async () => {
-  //   const spark = shape.spark({ val: { firstName: "12", lastName: "xyz" } });
-  //   const json = shape.toInternalJson(spark);
-  //   expect(json).toMatchObject({
-  //     "meta:id": expect.anything(),
-  //     "meta:type": 'sh4pe',
-  //     "val:firstName": "12",
-  //     "val:lastName": "xyz",
-  //   });
-  // });
-
-  // it("materializes from internal json", async () => {
-  //   const spark = shape.fromInternalJson({
-  //     "meta:id": expect.anything(),
-  //     "meta:type": 'sh4pe',
-  //     "val:firstName": "12",
-  //     "val:lastName": "xyz",
-  //   });
-  //   expect(spark).toMatchObject({
-  //     meta: { id: expect.anything(), type: 'sh4pe' },
-  //     val: { firstName: "12", lastName: "xyz" },
-  //     ref: {},
-  //     ext: {},
-  //   });
-  // });
 });

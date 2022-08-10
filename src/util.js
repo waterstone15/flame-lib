@@ -14,6 +14,16 @@ class Util {
     callback("val");
   }
 
+  static allFields(obj) {
+    var all_fields = []
+    this.perSection((section) => {
+      Object.keys(obj[section]).forEach((key) => {
+        all_fields.push(`${section}:${snakeCase(key)}`)
+      })
+    });
+    return all_fields;
+  }
+
   /*
    * Converts an expanded JS object (from Flame) to a collapsed JS object (for Firestore).
    */

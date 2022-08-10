@@ -78,9 +78,6 @@ class Shape {
   }
 
   fragment(sparkId, obj) {
-    console.log('hello')
-    console.log(this)
-    console.log(this.#type)
     var f = new Fragment(this.#dao, this.#ok, this.#type, sparkId);
     if (obj) {
       f.set(obj)
@@ -131,20 +128,6 @@ class Shape {
     await this.#dao.remove(this.#type, id);
   }
 
-  /*
-   * Converts a Spark to the internal Json format suitable for persistence.
-   */
-  // toInternalJson(spark) {
-  //   return spark.collapse();
-  // }
-
-  /*
-   * Converts back into a Spark from the internal Json format from the persistence layer.
-   */
-  // fromInternalJson(json) {
-  //   const values = Spark.expand(json);
-  //   return new Spark(this.#dao, this.#ok, values);
-  // }
 }
 
 
