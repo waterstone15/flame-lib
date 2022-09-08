@@ -201,7 +201,7 @@ describe("Spark", () => {
 
   it("converts to plain object", async () => {
     const spark = shape.spark({ val: { firstName: "12", lastName: "xyz" } });
-    const plain = spark.plainObject();
+    const plain = spark.obj();
     expect(plain).toMatchObject({
       meta: { id: expect.anything(), type: 'sh4pe' },
       val: { firstName: "12", lastName: "xyz" },

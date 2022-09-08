@@ -1,134 +1,289 @@
-const random = require("@stablelib/random");
-const uuid = require("uuid");
-var { paramCase } = require('change-case')
+(function() {
+  var DateTime, FlameError, Serializer, Shape, Spark, cloneDeep, every, forEach, get, intersection, isArray, isBoolean, isEmpty, isEqual, isFunction, isString, map, merge, omit, pick, random, set;
 
-const FlameError = require("./errors");
-const Fragment = require("./fragment");
-const Spark = require("./spark");
-const Util = require("./util");
+  cloneDeep = require('lodash/cloneDeep');
 
+  every = require('lodash/every');
 
-const nonEmptyString = (v) => typeof v === "string" && v.length > 0;
-const iso8601String = (v) => typeof v === "string" && !Object.is(Date.parse(v), NaN);
+  forEach = require('lodash/forEach');
 
+  get = require('lodash/get');
 
-class Shape {
-  static base(flame) {
-    const defaults = {}, ok = {};
-    Util.perSection(section => defaults[section] = {});
-    Util.perSection(section => ok[section] = {});
-    return new Shape(flame, "__flame__", defaults, ok);
-  }
+  intersection = require('lodash/intersection');
 
-  #dao = null;
-  #type = null;
-  #defaults = null;
-  #ok = null;
+  isArray = require('lodash/isArray');
 
-  constructor(dao, type, defaults, ok) {
-    this.#dao = dao;
-    this.#type = paramCase(type);
-    this.#defaults = defaults;
-    this.#ok = ok;
+  isBoolean = require('lodash/isBoolean');
 
-    this.#defaults.meta.type = () => this.#type;
-    this.#defaults.meta.id = () => `${this.#type}-${random.randomString(32)}`;
-    this.#defaults.meta.created_at = () => (new Date()).toISOString();
-    this.#defaults.meta.updated_at = () => (new Date()).toISOString();
+  isEmpty = require('lodash/isEmpty');
 
-    this.#ok.meta.type = nonEmptyString;
-    this.#ok.meta.id = nonEmptyString;
-    this.#ok.meta.created_at = iso8601String;
-    this.#ok.meta.updated_at = iso8601String;
-  }
+  isEqual = require('lodash/isEqual');
 
-  extend(type, spec) {
-    const defaults = {};
-    const ok = {};
-    Util.perSection(section => defaults[section] = spec[section] ?? {});
-    Util.perSection(section => ok[section] = (spec.ok ?? {})[section] ?? {});
+  isFunction = require('lodash/isFunction');
 
-    // verify "id" and "type" aren't explicit in the "meta" section:
-    if ("id" in defaults.meta) {
-      throw new FlameError(`'id' is a reserved attribute for 'meta' section of Flame spec`);
-    }
-    if ("type" in defaults.meta) {
-      throw new FlameError(`'type' is a reserved attribute for 'meta' section of Flame spec`);
-    }
+  isString = require('lodash/isString');
 
-    // normalize all defaults to be functions:
-    const normalize = (spec, key) => {
-      const v = spec[key];
-      spec[key] = (typeof v === "function") ? v : () => v;
-    };
-    Util.perSection(section => {
-      const s = defaults[section];
-      Object.keys(s).forEach((k) => normalize(s, k));
-    });
+  map = require('lodash/map');
 
-    // verify 'ok' for every field:
-    const check = (section, key) => {
-      if (defaults[section][key].length == 0 && typeof (ok[section] ?? {})[key] !== "function") {
-        throw new FlameError(`'ok.${section}.${key}' of Flame spec must be a function`);
+  merge = require('lodash/merge');
+
+  omit = require('lodash/omit');
+
+  pick = require('lodash/pick');
+
+  random = require('@stablelib/random');
+
+  Serializer = require('./serializer');
+
+  FlameError = require('./flame-error');
+
+  set = require('lodash/set');
+
+  Spark = require('./spark');
+
+  ({DateTime} = require('luxon'));
+
+  Shape = class Shape {
+    constructor(_adapter, _type, _obj, _config) {
+      var validatorsOk;
+      this.adapter = _adapter;
+      this.config = _config;
+      this.serializer = new Serializer(_config);
+      if (!isEqual(this.serializer.paths(_obj.data), this.serializer.paths(_obj.validators))) {
+        throw new FlameError('Every Shape field must have a validator.');
+        return;
       }
-    };
-    Util.perSection(section => Object.keys(defaults[section]).forEach((k) => check(section, k)));
-
-    return new Shape(this.#dao, type, defaults, ok);
-  }
-
-  fragment(sparkId, obj) {
-    var f = new Fragment(this.#dao, this.#ok, this.#type, sparkId);
-    if (obj) {
-      f.set(obj)
+      validatorsOk = every(this.serializer.paths(_obj.validators), function(_p) {
+        var v;
+        v = get(_obj.validators, _p);
+        return isFunction(v) && v.length === 1;
+      });
+      if (!validatorsOk) {
+        throw new FlameError('Every validator must be a function that takes one argument.');
+        return;
+      }
+      this.collection = this.serializer.collectionCasing(_type);
+      this.data = this.serializer.normalize(merge(this.defaultData(), _obj.data));
+      this.type = this.serializer.typeCasingDB(_type);
+      this.validators = this.serializer.normalize(merge(this.defaultValidators(), _obj.validators));
+      return;
     }
-    return f
-  }
 
-  /*
-   * Create an instance of this Shape, with the given values.
-   */
-  spark(from) {
-    // Verify 'from' is a subset of the specs:
-    Util.perSection(section => Object.keys(from[section] ?? {}).forEach((k) => {
-      if (!(k in this.#defaults[section])) throw new FlameError(`Unexpected key '${section}.${k}'`);
-    }));
+    defaultData() {
+      var df, fs;
+      df = {
+        collection: (_o) => {
+          return this.collection;
+        },
+        created_at: (_o) => {
+          return DateTime.local().setZone('utc').toISO();
+        },
+        deleted: (_o) => {
+          return false;
+        },
+        deleted_at: (_o) => {
+          return null;
+        },
+        id: (_o) => {
+          return `${this.type}-${random.randomString(32)}`;
+        },
+        idempotency_key: (_o) => {
+          return null;
+        },
+        type: (_o) => {
+          return this.type;
+        },
+        updated_at: (_o) => {
+          return null;
+        },
+        v: (_o) => {
+          return '1.0.0';
+        }
+      };
+      if (this.config.group) {
+        df = {
+          meta: df
+        };
+      }
+      fs = map(this.config.fields, (_f) => {
+        if (this.config.group) {
+          return `meta.${_f}`;
+        } else {
+          return _f;
+        }
+      });
+      return pick(df, fs);
+    }
 
-    // Initialize all raw fields:
-    const values = {};
-    Util.perSection(section => {
-      const defaults = this.#defaults[section];
-      const s = {...from[section] ?? {}};
-      Object.keys(defaults).filter(k => defaults[k].length == 0).forEach(k => s[k] = k in s ? s[k] : defaults[k]());
-      values[section] = s;
-    });
-    // Initialize all derived fields:
-    Util.perSection(section => {
-      const defaults = this.#defaults[section];
-      const s = values[section];
-      Object.keys(defaults).filter(k => defaults[k].length == 1).forEach(k => s[k] = defaults[k](values));
-    });
+    defaultValidators() {
+      var df;
+      df = {
+        collection: function(_v) {
+          return !isEmpty(_v) && isString(_v);
+        },
+        created_at: function(_v) {
+          return (_v === null) || (!isEmpty(_v) && isString(_v));
+        },
+        deleted: function(_v) {
+          return isBoolean(_v);
+        },
+        deleted_at: function(_v) {
+          return (_v === null) || (!isEmpty(_v) && isString(_v));
+        },
+        id: function(_v) {
+          return !isEmpty(_v) && isString(_v);
+        },
+        idempotency_key: function(_v) {
+          return isEmpty(_v) || (!isEmpty(_v) && isString(_v));
+        },
+        type: function(_v) {
+          return !isEmpty(_v) && isString(_v);
+        },
+        updated_at: function(_v) {
+          return (_v === null) || (!isEmpty(_v) && isString(_v));
+        },
+        v: function(_v) {
+          return !isEmpty(_v) && isString(_v);
+        }
+      };
+      if (this.config.group) {
+        df = {
+          meta: df
+        };
+      }
+      return pick(df, this.defaultPaths());
+    }
 
-    return new Spark(this.#dao, this.#ok, values);
-  }
+    defaultPaths() {
+      return map(this.config.fields, (_f) => {
+        if (this.config.group) {
+          return `meta.${_f}`;
+        } else {
+          return _f;
+        }
+      });
+    }
 
-  async get(id) {
-    return await this.#dao.get(this.#type, this.#ok, id);
-  }
+    extend(_type, _obj, _opts = {}) {
+      var config, obj;
+      obj = merge({
+        data: omit(cloneDeep(this.data), this.defaultPaths())
+      }, {
+        validators: omit(cloneDeep(this.validators), this.defaultPaths())
+      }, _obj);
+      config = this.config.extend(_opts);
+      return new Shape(this.adapter, _type, obj, config);
+    }
 
-  async find(...filters) {
-    return await this.#dao.find(this.#type, this.#ok, filters);
-  }
+    errors(_data, _fields) {
+      var _f, errors, fields, fn, i, kk, len, obj;
+      fields = this.serializer.paths(this.data);
+      if (isArray(_fields)) {
+        (fields = intersection(fields, _fields));
+      }
+      obj = this.obj(_data, _fields);
+      errors = {};
+      for (i = 0, len = fields.length; i < len; i++) {
+        _f = fields[i];
+        fn = get(this.validators, _f);
+        kk = fn(get(obj, _f));
+        if (!kk) {
+          set(errors, _f, kk);
+        }
+      }
+      return errors;
+    }
 
-  async list(pageSize, pageNo, orderBy, fields, ...filters) {
-    return await this.#dao.list(this.#type, this.#ok, pageSize, pageNo, orderBy, fields, filters);
-  }
+    obj(_data, _fields) {
+      var _f, d, fields, fn, i, len;
+      fields = this.serializer.paths(this.data);
+      if (isArray(_fields)) {
+        (fields = intersection(fields, _fields));
+      }
+      d = merge(cloneDeep(this.data), _data);
+      for (i = 0, len = fields.length; i < len; i++) {
+        _f = fields[i];
+        fn = get(d, _f);
+        if (isFunction(fn)) {
+          set(d, _f, fn(d));
+        }
+      }
+      return pick(d, fields);
+    }
 
-  async remove(id) {
-    await this.#dao.remove(this.#type, id);
-  }
+    ok(_data, _fields) {
+      return isEmpty(this.errors(_data, _fields));
+    }
 
-}
+    save(_data) {
+      var collapsed, collection, id, obj, writable;
+      if (!this.ok(_data)) {
+        return null;
+      }
+      obj = this.obj(_data);
+      collection = this.config.group ? obj.meta.collection : obj.collection;
+      id = this.config.group ? obj.meta.id : obj.id;
+      collapsed = this.serializer.collapse(obj);
+      writable = this.adapter.save(collection, id, collapsed);
+      return writable;
+    }
 
+    get(id) {
+      var readable;
+      readable = this.adapter.get(this.collection, id, this);
+      return readable;
+    }
 
-module.exports = Shape;
+    update(_data, _fields) {
+      var collapsed, collection, id, obj, updates, writable;
+      if (!this.ok(_data, _fields) || _fields === null) {
+        return null;
+      }
+      obj = this.obj(_data);
+      updates = this.obj(_data, _fields);
+      collection = this.config.group ? obj.meta.collection : obj.collection;
+      id = this.config.group ? obj.meta.id : obj.id;
+      collapsed = this.serializer.collapse(updates);
+      writable = this.adapter.update(collection, id, collapsed);
+      return writable;
+    }
+
+    del(_data) {
+      var collection, id, obj, writable;
+      obj = this.obj(_data);
+      collection = this.config.group ? obj.meta.collection : obj.collection;
+      id = this.config.group ? obj.meta.id : obj.id;
+      writable = this.adapter.del(collection, id);
+      return writable;
+    }
+
+    spark(_data) {
+      return new Spark(_data, this);
+    }
+
+    find(_constraints, _fields) {
+      var readable;
+      readable = this.adapter.find(this.collection, _constraints, this, _fields);
+      return readable;
+    }
+
+    list(_constraints) {
+      var readable;
+      readable = this.adapter.list(this.collection, _constraints, this);
+      return readable;
+    }
+
+    page(_opts) {
+      var readable;
+      readable = this.adapter.page(_opts, this.collection, this);
+      return readable;
+    }
+
+  };
+
+  // addQuery: ->
+
+  // q: ->
+  module.exports = Shape;
+
+}).call(this);

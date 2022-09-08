@@ -1,38 +1,40 @@
-const FlameError = require("./errors");
-const Shape = require("./shape");
-const Batch = require("./batch");
+(function() {
+  var Adapter, Configuration, Flame, Shape, cloneDeep, isArray, isBoolean, merge;
 
+  Adapter = require('./adapter');
 
-/*
- * The core Flame framework interface.
- * Instances of this are to be managed only via the FlameRegistry.
- */
-class Flame {
-  #dao = null;
-  #baseShape = null;
+  cloneDeep = require('lodash/cloneDeep');
 
-  constructor(dao) {
-    this.#dao = dao;
-    this.#baseShape = Shape.base(dao);
-  }
+  Configuration = require('./configuration');
 
-  async quench() {
-    await this.#dao.release();
-    this.#dao = null;
-  }
+  isArray = require('lodash/isArray');
 
-  shape(name, spec) {
-    return this.#baseShape.extend(name, spec);
-  }
+  isBoolean = require('lodash/isBoolean');
 
-  writeBatch() {
-    return new Batch(this.#dao);
-  }
+  merge = require('lodash/merge');
 
-  wildfire() {
-    return this.#dao.wildfire();
-  }
-}
+  Shape = require('./shape');
 
+  Flame = class Flame {
+    constructor(_app, _opts = {}) {
+      this.adapter = new Adapter(_app);
+      this.app = _app;
+      this.config = new Configuration(_opts);
+      return;
+    }
 
-module.exports = Flame;
+    wildfire() {
+      return this.app.fba;
+    }
+
+    shape(_type, _obj, _opts = {}) {
+      var config;
+      config = this.config.extend(_opts);
+      return new Shape(this.adapter, _type, _obj, config);
+    }
+
+  };
+
+  module.exports = Flame;
+
+}).call(this);

@@ -1,13 +1,68 @@
-const Flame = require("./registry.js");
+(function() {
+  var FL, FirebaseApp, Flame, FlameError, FlameLib, isEmpty;
 
+  FirebaseApp = require('./firebase-app');
 
-const VERSION = "0.0.1";
+  Flame = require('./flame');
 
-console.log('4')
+  FlameError = require('./flame-error');
 
+  isEmpty = require('lodash/isEmpty');
 
-module.exports = {
-  VERSION,
-  Flame,
-  FL: Flame,
-};
+  FlameLib = (function() {
+    var apps, flames, options;
+
+    class FlameLib {
+      register(_opts) {
+        var name, opt;
+        for (name in _opts) {
+          opt = _opts[name];
+          if (!isEmpty(options[name])) {
+            throw new FlameError(`'${name}' is already registered in Flame.`);
+          }
+          options[name] = opt;
+        }
+      }
+
+      async init(_name) {
+        var app, db, fba;
+        app = apps[_name];
+        if (!app) {
+          ({fba, db} = (await FirebaseApp.prototype.create(_name, options[_name])));
+          apps[_name] = {fba, db};
+        }
+      }
+
+      async ignite(_name) {
+        await this.init(_name);
+        flames[_name] = new Flame(apps[_name], options[_name]);
+        return flames[_name];
+      }
+
+      async quench(_name) {
+        if (apps[_name]) {
+          await apps[_name].db.terminate();
+          await apps[_name].fba.delete();
+          delete apps[_name];
+          delete options[_name];
+          delete flames[_name];
+        }
+      }
+
+    };
+
+    apps = {};
+
+    flames = {};
+
+    options = {};
+
+    return FlameLib;
+
+  }).call(this);
+
+  FL = new FlameLib();
+
+  module.exports = FL;
+
+}).call(this);

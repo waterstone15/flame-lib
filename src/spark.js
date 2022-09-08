@@ -1,82 +1,48 @@
-var isArray = require("lodash/isArray");
-var isFunction = require("lodash/isFunction");
-var reduce = require("lodash/reduce");
-var intersection = require("lodash/intersection");
-var { paramCase } = require("change-case");
-var { snakeCase } = require("change-case");
+(function() {
+  var Spark, intersection, pick;
 
-const Util = require("./util");
-const FlameError = require("./errors");
+  intersection = require('lodash/intersection');
 
+  pick = require('lodash/pick');
 
-/*
- * A Flame Shape Instance.
- */
-class Spark {
-  #dao = null;
-  #validators = null;
-  ext = null;
-  index = null;
-  meta = null;
-  ref = null;
-  val = null;
+  Spark = class Spark {
+    constructor(_data, shape) {
+      this.shape = shape;
+      this.data = this.shape.serializer.normalize(pick(_data, this.shape.serializer.paths(this.shape.data)));
+      return;
+    }
 
-  constructor(dao, validators, plainObj) {
-    this.#dao = dao;
-    this.#validators = validators;
-    Util.perSection(section => this[section] = {});
-    Util.perSection(section => Object.keys(plainObj[section]).forEach(key => this[section][snakeCase(key)] = plainObj[section][key]));
-  }
+    errors(_fields) {
+      return this.shape.errors(this.data, _fields);
+    }
 
-  errors() {
-    const okSection = section => {
-      const s = this[section];
-      const badKeys = Object.keys(s).filter(k => !this.#validators[section][k](s[k]));
-      return badKeys.map(k => `${section}.${k}`);
-    };
-    var ret = [];
-    Util.perSection(section => ret = ret.concat(okSection(section)));
-    return ret;
-  }
+    save() {
+      return this.shape.save(this.data);
+    }
 
-  ok(fields) {
-    var af = Util.allFields(this.plainObject())
-    fields = isArray(fields) ? intersection(fields, af) : af;
+    obj(_fields) {
+      return this.shape.obj(this.data, _fields);
+    }
 
-    var ok = reduce(fields, (acc, field, index) => {
-      var [section, key] = field.split(':')
-      key = snakeCase(key)
-      var validate = this.#validators[section][key]
-      return isFunction(validate) ? (acc && validate(this[section][key])) : false;
-    }, true)
+    ok(_fields) {
+      return this.shape.ok(this.data, _fields);
+    }
 
-    return ok
-  }
+    del() {
+      return this.shape.del(this.data);
+    }
 
-  async insert() {
-    await this.#dao.insert(this);
-  }
+    update(_fields = []) {
+      var all_fields;
+      if (_fields === []) {
+        return null;
+      }
+      all_fields = this.shape.serializer.paths(this.shape.data);
+      return this.shape.update(this.data, intersection(all_fields, _fields));
+    }
 
-  async upsert() {
-    await this.#dao.upsert(this);
-  }
+  };
 
-  async remove() {
-    await this.#dao.remove(this.meta.type, this.meta.id);
-  }
+  module.exports = Spark;
 
-  /*
-   * A plain JS object that is equivalent to this Spark.
-   */
-  plainObject() {
-    const obj = {};
-    Util.perSection(section => obj[section] = {});
-    const encode = (section, key) => obj[section][key] = this[section][key];
-    Util.perSection(section => Object.keys(this[section]).forEach(key => encode(section, key)));
-    return obj;
-  }
-
-};
-
-
-module.exports = Spark;
+}).call(this);
