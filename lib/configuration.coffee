@@ -23,7 +23,7 @@ class Configuration
     type_case_db: 'kebab'
 
   ok_cases = [ 'camel', 'kebab', 'pascal', 'snake', ]
-  ok_separators = [ ':' ]
+  ok_separators = [ '-', '--', ':', '::', '_', ]
 
   isStrings = (_gs) ->
     return (

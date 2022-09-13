@@ -6,6 +6,7 @@ kebabCase    = require 'lodash/kebabCase'
 keys         = require 'lodash/keys'
 map          = require 'lodash/map'
 pluralize    = require 'pluralize'
+replace      = require 'lodash/replace'
 set          = require 'lodash/set'
 snakeCase    = require 'lodash/snakeCase'
 sortBy       = require 'lodash/sortBy'
@@ -83,7 +84,9 @@ class Serializer
     obj = {}
     for _k in keys(_obj)
       if @cfg.group
-        [ group, tail... ] = split(_k, @cfg.separator)
+        [ group ] = split(_k, @cfg.separator, 1)
+        separator_escaped = @cfg.separator.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
+        tail = replace(_k, (new RegExp("[a-z]+(#{separator_escaped})")), '')
         key = join(tail, '')
         set(obj, "#{@fieldCasing(group)}.#{@fieldCasing(key)}", _obj[_k])
       else

@@ -58,7 +58,7 @@
 
     ok_cases = ['camel', 'kebab', 'pascal', 'snake'];
 
-    ok_separators = [':'];
+    ok_separators = ['-', '--', ':', '::', '_'];
 
     isStrings = function(_gs) {
       return !isEmpty(_gs) && isArray(_gs) && reduce(_gs, (function(_r, _g) {

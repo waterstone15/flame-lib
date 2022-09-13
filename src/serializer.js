@@ -1,5 +1,5 @@
 (function() {
-  var Serializer, camelCase, capitalize, flatten, join, kebabCase, keys, map, pluralize, set, snakeCase, sortBy, split;
+  var Serializer, camelCase, capitalize, flatten, join, kebabCase, keys, map, pluralize, replace, set, snakeCase, sortBy, split;
 
   camelCase = require('lodash/camelCase');
 
@@ -16,6 +16,8 @@
   map = require('lodash/map');
 
   pluralize = require('pluralize');
+
+  replace = require('lodash/replace');
 
   set = require('lodash/set');
 
@@ -104,13 +106,15 @@
       }
 
       expand(_obj) {
-        var _k, group, i, key, len, obj, ref, tail;
+        var _k, group, i, key, len, obj, ref, separator_escaped, tail;
         obj = {};
         ref = keys(_obj);
         for (i = 0, len = ref.length; i < len; i++) {
           _k = ref[i];
           if (this.cfg.group) {
-            [group, ...tail] = split(_k, this.cfg.separator);
+            [group] = split(_k, this.cfg.separator, 1);
+            separator_escaped = this.cfg.separator.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+            tail = replace(_k, new RegExp(`[a-z]+(${separator_escaped})`), '');
             key = join(tail, '');
             set(obj, `${this.fieldCasing(group)}.${this.fieldCasing(key)}`, _obj[_k]);
           } else {
