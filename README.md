@@ -22,9 +22,10 @@ Usage:
 9. [Upsert](#upsert)
 10. [Delete](#delete)
 11. [Get](#get)
-12. [Find](#find)
-13. [List](#list)
-14. [Write Transaction](#write-transaction)
+12. [Get All](#get-all)
+13. [Find](#find)
+14. [List](#list)
+15. [Write Transaction](#write-transaction)
 
 ## API
 
@@ -101,12 +102,12 @@ john.ok();
 
 ### Insert (aka Save)
 ```javascript
-await john.insert();
+await john.insert().write();
 ```
 
 ### Update
 ```javascript
-await john.fragments().set("val", "name", "Jimmy").update();
+await john.fragments().set("val", "name", "Jimmy").write();
 ```
 
 ### Upsert
@@ -121,12 +122,17 @@ await john.remove();
 
 ### Get
 ```javascript
-await Person.get('id');
+await Person.get('id').read();
+```
+
+### Get All
+```javascript
+await Person.getAll([ 'id', 'id', '...' ]).read();
 ```
 
 ### Find
 ```javascript
-john = await Person.find(['firstName', '==', 'John'], ['lastName', '==', 'Doe']);
+john = await Person.find(['firstName', '==', 'John'], ['lastName', '==', 'Doe']).read();
 // any number of constraints that can be used, but to identify a single document only
 ```
 
@@ -139,7 +145,7 @@ await Person.list(
   ['meta:id', 'val:name'], // fields to retrieve (null for full Sparks)
   ['val', 'name', '>', 'J'], // filters
   ['meta', 'createdAt', '>', '2021-03-03T01:01:01Z'], // filters ...
-);
+).read();
 ```
 
 ### Write Transaction

@@ -18,7 +18,7 @@ class Configuration
     group: true
     groups: [ 'meta', 'ext', 'index', 'rel', 'val', ]
     pluralize: true
-    separator: ':'
+    separator: '-'
     type_case: 'pascal'
     type_case_db: 'kebab'
 

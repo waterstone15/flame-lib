@@ -141,9 +141,12 @@ class Shape
     writable = @adapter.save(collection, id, collapsed)
     return writable
 
+  getAll: (_ids) ->
+    readable = @adapter.getAll(@collection, _ids, this)
+    return readable
 
-  get: (id) ->
-    readable = @adapter.get(@collection, id, this)
+  get: (_id) ->
+    readable = @adapter.get(@collection, _id, this)
     return readable
 
 

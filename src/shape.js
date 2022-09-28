@@ -228,9 +228,15 @@
       return writable;
     }
 
-    get(id) {
+    getAll(_ids) {
       var readable;
-      readable = this.adapter.get(this.collection, id, this);
+      readable = this.adapter.getAll(this.collection, _ids, this);
+      return readable;
+    }
+
+    get(_id) {
+      var readable;
+      readable = this.adapter.get(this.collection, _id, this);
       return readable;
     }
 

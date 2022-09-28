@@ -38,6 +38,24 @@ class Adapter
     return writeable
 
 
+  getAll: (_collection, _ids, _shape) ->
+    readable =
+      collection: _collection
+      doc_refs: map(_ids, (_id) => @db.collection(_collection).doc(_id))
+      db: @db
+      type: 'getAll'
+      read: ->
+        try
+          dss = await @db.getAll(@doc_refs...)
+          if !isEmpty(dss)
+            expanded = map(dss, (_ds) -> _shape.serializer.expand(_ds.data()))
+            return expanded
+        catch err
+          console.log err
+          (->)()
+        return null
+
+
   get: (_collection, _id, _shape) ->
     readable =
       collection: _collection

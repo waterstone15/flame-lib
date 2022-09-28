@@ -58,6 +58,35 @@
         return writeable;
       }
 
+      getAll(_collection, _ids, _shape) {
+        var readable;
+        return readable = {
+          collection: _collection,
+          doc_refs: map(_ids, (_id) => {
+            return this.db.collection(_collection).doc(_id);
+          }),
+          db: this.db,
+          type: 'getAll',
+          read: async function() {
+            var dss, err, expanded;
+            try {
+              dss = (await this.db.getAll(doc_refs));
+              if (!dss.empty) {
+                expanded = map(dss.docs, function(_ds) {
+                  return _shape.serializer.expand(_ds.data());
+                });
+                return expanded;
+              }
+            } catch (error) {
+              err = error;
+              console.log(err);
+              (function() {})();
+            }
+            return null;
+          }
+        };
+      }
+
       get(_collection, _id, _shape) {
         var readable;
         return readable = {
