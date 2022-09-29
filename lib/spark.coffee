@@ -22,6 +22,7 @@ class Spark
     return @shape.obj(@data, _fields)
 
 
+  valid: -> @ok(arguments...)
   ok: (_fields) ->
     return @shape.ok(@data, _fields)
 
