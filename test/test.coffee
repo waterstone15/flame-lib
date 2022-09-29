@@ -19,10 +19,10 @@ _            = require 'lodash'
       pluralize: true
       prefix: true
   })
-  flame = await FL.ignite('main')
-  db = flame.wildfire().firestore()
+  Flame = await FL.ignite('main')
+  db = Flame.wildfire().firestore()
 
-  Thing = flame.shape('thing', {
+  Thing = Flame.shape('thing', {
     data:
       rel:
         a: null

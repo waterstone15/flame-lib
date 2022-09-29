@@ -17,6 +17,7 @@ class Flame
     return @app.fba
 
 
+  model: -> @shape(arguments...)
   shape: (_type, _obj, _opts = {}) ->
     config = @config.extend(_opts)
     return new Shape(@adapter, _type, _obj, config)

@@ -70,9 +70,9 @@
           read: async function() {
             var dss, err, expanded;
             try {
-              dss = (await this.db.getAll(doc_refs));
-              if (!dss.empty) {
-                expanded = map(dss.docs, function(_ds) {
+              dss = (await this.db.getAll(...this.doc_refs));
+              if (!isEmpty(dss)) {
+                expanded = map(dss, function(_ds) {
                   return _shape.serializer.expand(_ds.data());
                 });
                 return expanded;

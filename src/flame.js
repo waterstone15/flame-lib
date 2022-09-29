@@ -19,6 +19,10 @@
       return this.app.fba;
     }
 
+    model() {
+      return this.shape(...arguments);
+    }
+
     shape(_type, _obj, _opts = {}) {
       var config;
       config = this.config.extend(_opts);

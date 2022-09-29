@@ -165,6 +165,7 @@ class Shape
     return writable
 
 
+  remove: -> @del(arguments...)
   del: (_data) ->
     obj = @obj(_data)
     collection = if @config.group then obj.meta.collection else obj.collection
@@ -174,6 +175,7 @@ class Shape
     return writable
 
 
+  create: -> @spark(arguments...)
   spark: (_data) ->
     return new Spark(_data, this)
 

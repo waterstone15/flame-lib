@@ -254,6 +254,10 @@
       return writable;
     }
 
+    remove() {
+      return this.del(...arguments);
+    }
+
     del(_data) {
       var collection, id, obj, writable;
       obj = this.obj(_data);
@@ -261,6 +265,10 @@
       id = this.config.group ? obj.meta.id : obj.id;
       writable = this.adapter.del(collection, id);
       return writable;
+    }
+
+    create() {
+      return this.spark(...arguments);
     }
 
     spark(_data) {

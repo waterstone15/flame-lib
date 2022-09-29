@@ -11,7 +11,7 @@
 <br>
 
 Usage:
-1. [Ignite](#ignite)
+1. [Register](#register)
 2. [Hold](#hold)
 3. [Quench](#quench)
 4. [Shape (i.e. define model)](#shape)
@@ -29,139 +29,177 @@ Usage:
 
 ## API
 
-### Ignite
+### Register
+
+Define the firebase apps and their connections for use with Flame models.
+
 ```javascript
-flame = (require('flame-lib').Flame;
+var FL = require('flame-lib')
 
-const dbURL = process.env.FIREBASE_DATABASE_URL;
-const cfg = JSON.parse(process.env.FIREBASE_CONFIG);  // FIREBASE_CONFIG is the firebase admin service account stored as a JSON string.
-
-var Flame = await flame.ignite('main', cfg, db_url);
+FL.register({
+  'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) }
+})
 ```
 
-### Hold
-```javascript
-Flame = flame.hold();
-// => retrieves previously ignited Flame instance using 'default' firestore app.
+### Ignite
 
-FlameOther = flame.hold('other');
-// => retrieves previously ignited Flame instance using 'other' firestore app.
-// no need for multi-app support at this point
+Returns a previously registered Flame. Estabilishes the conection to Firestore if not alrady connected.
+
+```javascript
+var FL = require('flame-lib')
+
+var Flame = await FL.ignite('main')
 ```
 
 ### Quench
-```javascript
-await flame.quench();
-// => releases resources for previously ignited Flame using 'default' firestore app.
 
-await flame.quench('other');
-// => releases resources for previously ignited Flame using 'other' firestore app.
+Releases resources for a previously ignited Flame.
+
+```javascript
+await Flame.quench('main');
 ```
 
-### Shape
+### Shape (aka Model)
 ```javascript
-Person = Flame.shape("Person", {
-  val: {
-    firstName: null,  // a raw field
-    lastName: null,  // a raw field
-    fullName: s => `${s.val.firstName} ${s.val.lastName}`,  // a derived field (based on raw fields)
+var Person = Flame.shape('Person', {
+  data: {
+    first_name: null,
+    last_name: null,
+    full_name: (_data) => `${_data.first_name} ${_data.last_name}`,
   },
-  ok: {
-    val: {
-      firstName: (v) => !isEmpty(v) && isString(v),
-      lastName: (v) => !isEmpty(v) && isString(v),
-      // derived fields don't have a corresponding validator
-    },
+  validators: {
+    first_name: (v) => !_.isEmpty(v) && _.isString(v),
+    last_name: (v) => !_.isEmpty(v) && _.isString(v),
   },
 });
-// Person is now an extended Flame object with more fields and matching validators.
-// Child = Person.extend({}) should work as well (for arbritrary model extension)
-// any field can have a default value, or a default function – if a function is supplied, when creating a new instance of the model, the function should be run to generate the value (eg, good for generating new IDs, or an Idempotency Key depends on things not known until the instance is created, but created the same way for all Models.
-// there are also a default set of fields all Flame models will have (and eventually some should be excludeable via options parameter I suppose)
-// a validator (a corresponding ok.<field path> is required for every field
 ```
 
-### Spark
+### Spark (aka Create)
 ```javascript
 john = Person.spark({
-  val: {
-    name: 'John Doe',
+    first_name: 'John',
+    last_name: 'Doe',
   },
 });
-// once john is created, the field values cannot be modified. create returns an instance with imutable fields. This forces some better coding habbits (on my part) and helps me reason about what *is* going into the database.
 ```
 
-### Ok
+### Validation
+
+Check if all validators pass.
+
+```javascript
+john.ok();
+// => Boolean
+```
+
+Get an errors object.
+
 ```javascript
 john.errors();
-// returns an object like { val: { name: 'John Doe' }} of the fields that are not valid.
-
-john.ok();
-// returns true IFF there are no errors
+// => { first_name: false, last_name: true }
 ```
 
-### Insert (aka Save)
+### Save
+
+Save returns a "writeable" which has a `write()` function that is used to commit to Firestore.
+
 ```javascript
-await john.insert().write();
+await john.save().write();
 ```
 
 ### Update
+
+Update returns a "writeable" which has a `write()` function that is used to commit to Firestore.
+
 ```javascript
-await john.fragments().set("val", "name", "Jimmy").write();
+await john.update({ first_name: 'Jane' }).write();
 ```
 
-### Upsert
-```javascript
-await john.upsert();
-```
+### Delete (aka Remove)
 
-### Remove (aka Delete)
+Del returns a "writeable" which has a `write()` function that is used to commit to Firestore.
+
 ```javascript
-await john.remove();
+await john.del().write;
 ```
 
 ### Get
+
+Get returns a "readable" which has a `read()` function that is used to retrive data from Firestore.
+
+* The first argument is a document ID.
+* The second argument is a list of fields to include.
+
 ```javascript
-await Person.get('id').read();
+var jane = await Person.get('id').read();
+// => { first_name: 'Jane', first_name: 'Doe', full_name: 'Jane Doe' }
 ```
 
 ### Get All
+
+Get All returns a "readable" which has a `read()` function that is used to retrive data from Firestore.
+
+* The first argument is a list of document IDs.
+* The second argument is a list of fields to include.
+
 ```javascript
-await Person.getAll([ 'id', 'id', '...' ]).read();
+var people = await Person.getAll([ 'id', 'id', '...' ]).read();
+// => [{ first_name: 'Jane', first_name: 'Doe', full_name: 'Jane Doe' }, ...]
 ```
 
 ### Find
+
+Find returns a "readable" which has a `read()` function that is used to retrive data from Firestore.
+
+* The first argument is an array of constraints.
+* The second argument is a list of fields to include.
+
 ```javascript
-john = await Person.find(['firstName', '==', 'John'], ['lastName', '==', 'Doe']).read();
-// any number of constraints that can be used, but to identify a single document only
+var john = await Person.list([['where', 'first_name', '==', 'John']], ['full_name']).read();
+// => { full_name: 'Jane Doe' }
 ```
 
 ### List
+
+List returns a "readable" which has a `read()` function that is used to retrive data from Firestore.
+
+* The first argument is an array of constraints.
+* The second argument is a list of fields to include.
+
 ```javascript
-await Person.list(
-  10,  // page size
-  2, // page number (zero based)
-  ['name'],  // order by (null for no order)
-  ['meta:id', 'val:name'], // fields to retrieve (null for full Sparks)
-  ['val', 'name', '>', 'J'], // filters
-  ['meta', 'createdAt', '>', '2021-03-03T01:01:01Z'], // filters ...
-).read();
+var john = await Person.list([['where', 'first_name', '>', 'J']], ['full_name']).read();
+// => [{ full_name: 'Jane Doe' }, { full_name: 'John Doe' }]
 ```
 
-### Write Transaction
+### Page
+
+Page returns a "readable" which has a `read()` function that is used to retrive data from Firestore.
+
 ```javascript
-await Flame.batch()
-  .insert(sparkA)
-  .update(sparkB.fragments().set("val", "firstName", "Martin"))
-  .remove(sparkC)
-  .commit();
-]);
+var page = await Person.page({
+  constraints: [['where', 'first_name', '>', 'J']],
+  cursor: {
+    type: 'id',
+    inclusive: true,
+  }
+  direction: 2,
+  fields: [ 'full_name' ],
+  order_by: {
+    direction: 'asc',
+    field: 'first_name',
+  }
+  size: 2,
+}).read();
+// => {
+//   collection: {
+//     first: <Person>,
+//     last: <Person>,
+//   }
+//   page: {
+//     first: <Person>,
+//     items: [<Person>, ...],
+//     last: <Person>,
+//   }
+// }
 ```
 
-
-## Development
-
-### To run the tests:
-0. install Firebase emulators ```firebase init```
-1. start Firebase emulators: ```firebase emulators:start```
-2. run the tests: ```npm run test```
