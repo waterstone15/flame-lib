@@ -12,14 +12,14 @@
 
 Usage:
 1. [Register](#register)
-2. [Hold](#hold)
+2. [Ignite](#ignite)
 3. [Quench](#quench)
 4. [Shape (aka Model)](#shape-aka-model)
 5. [Spark (aka Create)](#spark-aka-create)
-6. [VValidation](#validattion)
+6. [Validation](#validattion)
 7. [Save](#save)
 8. [Update](#update)
-9. [Delete](#delete)
+9. [Delete](#delete-aka-remove)
 10. [Get](#get)
 11. [Get All](#get-all)
 12. [Find](#find)
@@ -84,17 +84,16 @@ john = Person.spark({
 
 ### Validation
 
-Check if all validators pass.
 
 ```javascript
 john.ok();
-// => Boolean
-```
 
-Get an errors object.
+// => true
+```
 
 ```javascript
 john.errors();
+
 // => { first_name: false, last_name: true }
 ```
 
@@ -108,18 +107,14 @@ await john.save().write();
 
 ### Update
 
-Update returns a "writeable" which has a `write()` function that is used to commit to Firestore.
-
 ```javascript
 await john.update({ first_name: 'Jane' }).write();
 ```
 
 ### Delete (aka Remove)
 
-Del returns a "writeable" which has a `write()` function that is used to commit to Firestore.
-
 ```javascript
-await john.del().write;
+await john.del().write();
 ```
 
 ### Get
@@ -131,30 +126,29 @@ Get returns a "readable" which has a `read()` function that is used to retrive d
 
 ```javascript
 var jane = await Person.get('id').read();
+
 // => { first_name: 'Jane', first_name: 'Doe', full_name: 'Jane Doe' }
 ```
 
 ### Get All
-
-Get All returns a "readable" which has a `read()` function that is used to retrive data from Firestore.
 
 * The first argument is a list of document IDs.
 * The second argument is a list of fields to include.
 
 ```javascript
 var people = await Person.getAll([ 'id', 'id', '...' ]).read();
+
 // => [{ first_name: 'Jane', first_name: 'Doe', full_name: 'Jane Doe' }, ...]
 ```
 
 ### Find
-
-Find returns a "readable" which has a `read()` function that is used to retrive data from Firestore.
 
 * The first argument is an array of constraints.
 * The second argument is a list of fields to include.
 
 ```javascript
 var john = await Person.list([['where', 'first_name', '==', 'John']], ['full_name']).read();
+
 // => { full_name: 'Jane Doe' }
 ```
 
@@ -167,6 +161,7 @@ List returns a "readable" which has a `read()` function that is used to retrive 
 
 ```javascript
 var john = await Person.list([['where', 'first_name', '>', 'J']], ['full_name']).read();
+
 // => [{ full_name: 'Jane Doe' }, { full_name: 'John Doe' }]
 ```
 
@@ -189,6 +184,7 @@ var page = await Person.page({
   }
   size: 2,
 }).read();
+
 // => {
 //   collection: {
 //     first: <Person>,
