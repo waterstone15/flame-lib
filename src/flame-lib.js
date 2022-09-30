@@ -19,6 +19,7 @@
           opt = _opts[name];
           if (!isEmpty(options[name])) {
             throw new FlameError(`'${name}' is already registered in Flame.`);
+            return;
           }
           options[name] = opt;
         }
@@ -34,6 +35,10 @@
       }
 
       async ignite(_name) {
+        if (!options[_name]) {
+          throw new FlameError(`'${_name}' is not registered in Flame.`);
+          return;
+        }
         await this.init(_name);
         flames[_name] = new Flame(apps[_name], options[_name]);
         return flames[_name];
@@ -44,9 +49,19 @@
           await apps[_name].db.terminate();
           await apps[_name].fba.delete();
           delete apps[_name];
-          delete options[_name];
+        }
+        if (flames[_name]) {
           delete flames[_name];
         }
+        if (options[_name]) {
+          delete options[_name];
+        }
+      }
+
+      purge() {
+        apps = {};
+        flames = {};
+        options = {};
       }
 
     };

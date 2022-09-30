@@ -12,19 +12,19 @@
 
 Usage:
 1. [Register](#register)
-2. [Ignite](#ignite)
-3. [Quench](#quench)
-4. [Shape (aka Model)](#shape-aka-model)
-5. [Spark (aka Create)](#spark-aka-create)
-6. [Validation](#validattion)
-7. [Save](#save)
-8. [Update](#update)
-9. [Delete](#delete-aka-remove)
-10. [Get](#get)
-11. [Get All](#get-all)
-12. [Find](#find)
-13. [List](#list)
-14. [Page](#page)
+1. [Ignite](#ignite)
+1. [Quench](#quench)
+1. [Shape (aka Model)](#shape-aka-model)
+1. [Spark (aka Create)](#spark-aka-create)
+1. [Validation](#validattion)
+1. [Save](#save)
+1. [Update](#update)
+1. [Delete](#delete-aka-remove)
+1. [Get](#get)
+1. [Get All](#get-all)
+1. [Find](#find)
+1. [List](#list)
+1. [Page](#page)
 
 ## API
 

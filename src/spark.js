@@ -24,6 +24,10 @@
       return this.shape.obj(this.data, _fields);
     }
 
+    valid() {
+      return this.ok(...arguments);
+    }
+
     ok(_fields) {
       return this.shape.ok(this.data, _fields);
     }
