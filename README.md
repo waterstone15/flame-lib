@@ -36,7 +36,7 @@ Define the firebase apps and their connections for use with Flame models.
 var FL = require('flame-lib')
 
 FL.register({
-  'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) }
+  'main': { service_account: JSON.parse(process.env.SERVICE_ACCOUNT) }
 })
 ```
 
