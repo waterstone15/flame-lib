@@ -10,7 +10,7 @@
 <hr style='height: 1px;'/>
 <br>
 
-Flame is built do simplify working with Firestore. Flame abastracts away redundant boilerplate code used for typical database operations into a compact API. Flame also makes it easy to define and validate your data models.
+Flame is built to simplify working with Firestore. Flame abastracts away redundant boilerplate code used for typical database operations into a compact API. Flame also makes it easy to define and validate your data models.
 
 1. [Register](#register)
 1. [Ignite](#ignite)

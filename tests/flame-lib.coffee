@@ -10,7 +10,7 @@ chaiAsPromised = require 'chai-as-promised'
 chai.use(chaiAsPromised)
 assert = chai.assert
 
-FL = require 'flame-lib'
+FL = require '@/lib/flame-lib'
 
 rejects = (fn, err) ->
   try
@@ -27,6 +27,16 @@ resolves = (fn) ->
   catch e
     ok = false
   return ok
+
+# chai.Assertion.addProperty('resolves', (msg) ->
+#   obj = flag(this, 'object')
+
+#   this.assert(
+#       typeof obj === 'number' && isFinite(obj)
+#     , 'expected #{this} to be a finite number'
+#     , 'expected #{this} to not be a finite number'
+#   );
+# });
 
 describe 'FlameLib', ->
 
@@ -78,7 +88,6 @@ describe 'FlameLib', ->
 
     it 'a registered app can be accessed if already initalized', ->
       fn = ->
-        throw new Error('bla')
         FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
         Flame = await FL.ignite('main')
         Flame = await FL.ignite('main')
@@ -90,7 +99,7 @@ describe 'FlameLib', ->
     it 'a unregistered app cannot be accessed and throws an error', ->
       err = "'bad' is not registered in Flame."
       fn = ->
-        Flame = await FL.ignite('bad')
+        Flame = FL.ignite('bad')
 
       ok = await rejects(fn, err)
       assert(ok, 'An error should be thrown.')
