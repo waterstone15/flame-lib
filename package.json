@@ -18,7 +18,7 @@
   "scripts": {
     "compile": "run-s compile:coffee",
     "compile:coffee": "./node_modules/coffeescript/bin/coffee --compile --no-header --output ./src ./lib",
-    "prepare": "compile",
+    "prepare": "yarn compile",
     "test": "mocha --require coffeescript/register --reporter list ./tests/**/*.coffee"
   },
   "private": false,
