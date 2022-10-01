@@ -3,6 +3,8 @@ Flame         = require './flame'
 FlameError    = require './flame-error'
 isEmpty       = require 'lodash/isEmpty'
 
+VERSION = '0.0.4'
+
 
 class FlameLib
 
