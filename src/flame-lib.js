@@ -1,5 +1,5 @@
 (function() {
-  var FL, FirebaseApp, Flame, FlameError, FlameLib, isEmpty;
+  var FL, FirebaseApp, Flame, FlameError, FlameLib, VERSION, isEmpty;
 
   FirebaseApp = require('./firebase-app');
 
@@ -8,6 +8,8 @@
   FlameError = require('./flame-error');
 
   isEmpty = require('lodash/isEmpty');
+
+  VERSION = '0.0.6';
 
   FlameLib = (function() {
     var apps, flames, options;
