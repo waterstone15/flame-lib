@@ -2,7 +2,7 @@
   "name": "flame-lib",
   "version": "0.0.8",
   "description": "A data model and query library for Firestore.",
-  "main": "./src/flame-lib.js",
+  "main": "./lib/flame-lib.js",
   "repository": "git@github.com:waterstone15/flame-lib.git",
   "author": "Brian Waterstone <code@waterstone15.com>",
   "license": "MIT",
@@ -11,14 +11,14 @@
   },
   "exports": {
     ".": {
-      "import": "./src/flame-lib.js",
-      "require": "./src/flame-lib.js"
+      "import": "./lib/flame-lib.js",
+      "require": "./lib/flame-lib.js"
     }
   },
   "scripts": {
     "bump": "bump --tag",
     "compile": "run-s compile:coffee",
-    "compile:coffee": "./node_modules/coffeescript/bin/coffee --compile --no-header --output ./src ./lib",
+    "compile:coffee": "./node_modules/coffeescript/bin/coffee --compile --no-header --output ./lib ./src",
     "prepare": "yarn compile",
     "test": "mocha --require coffeescript/register --reporter list ./tests/**/*.coffee"
   },
