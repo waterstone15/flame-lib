@@ -1,6 +1,6 @@
 {
   "name": "flame-lib",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A data model and query library for Firestore.",
   "main": "./src/flame-lib.js",
   "repository": "git@github.com:waterstone15/flame-lib.git",
@@ -16,6 +16,7 @@
     }
   },
   "scripts": {
+    "bump": "bump",
     "compile": "run-s compile:coffee",
     "compile:coffee": "./node_modules/coffeescript/bin/coffee --compile --no-header --output ./src ./lib",
     "prepare": "yarn compile",
@@ -38,5 +39,8 @@
     "npm-run-all": "^4.1.5",
     "pluralize": "^8.0.0",
     "rsvp": "^4.8.5"
+  },
+  "devDependencies": {
+    "@jsdevtools/version-bump-prompt": "^6.1.0"
   }
 }
