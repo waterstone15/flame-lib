@@ -1,5 +1,6 @@
 cloneDeep    = require 'lodash/cloneDeep'
 every        = require 'lodash/every'
+FlameError   = require './flame-error'
 forEach      = require 'lodash/forEach'
 get          = require 'lodash/get'
 intersection = require 'lodash/intersection'
@@ -15,7 +16,6 @@ omit         = require 'lodash/omit'
 pick         = require 'lodash/pick'
 random       = require '@stablelib/random'
 Serializer   = require './serializer'
-FlameError   = require './flame-error'
 set          = require 'lodash/set'
 Spark        = require './spark'
 { DateTime } = require 'luxon'
@@ -29,9 +29,12 @@ class Shape
     @config     = _config
     @serializer = new Serializer(_config)
 
-    if !isEqual(@serializer.paths(_obj.data), @serializer.paths(_obj.validators))
-      throw new FlameError('Every Shape field must have a validator.')
+    defaultValidator = (_d) -> true
+    default_validators = {}
+    forEach(@serializer.paths(_obj.data), (_p) ->
+      if !isFunction(get(_obj, "validators.#{_p}")) then set(_obj, "validators.#{_p}", defaultValidator)
       return
+    )
 
     validatorsOk = every(@serializer.paths(_obj.validators), (_p) ->
       v = get(_obj.validators, _p)
@@ -110,7 +113,7 @@ class Shape
     for _f in fields
       fn = get(@validators, _f)
       kk = fn(get(obj, _f))
-      set(errors, _f, kk) if !kk
+      set(errors, _f, !kk) if !kk
     return errors
 
 
@@ -180,6 +183,7 @@ class Shape
     return new Spark(_data, this)
 
 
+  findOne: -> @find(arguments...)
   find: (_constraints, _fields) ->
     readable = @adapter.find(@collection, _constraints, this, _fields)
     return readable

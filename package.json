@@ -20,7 +20,8 @@
     "compile": "run-s compile:coffee",
     "compile:coffee": "./node_modules/coffeescript/bin/coffee --compile --no-header --output ./lib ./src",
     "prepare": "yarn compile",
-    "test": "mocha --require coffeescript/register --reporter list ./tests/**/*.coffee"
+    "test": "run-s compile && mocha --require coffeescript/register --reporter list ./tests/**/*.coffee",
+    "test:wip": "run-s compile && mocha --require coffeescript/register --reporter list ./tests/wip.coffee"
   },
   "private": false,
   "dependencies": {

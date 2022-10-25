@@ -1,7 +1,11 @@
 FirebaseApp   = require './firebase-app'
 Flame         = require './flame'
 FlameError    = require './flame-error'
+forEach       = require 'lodash/forEach'
 isEmpty       = require 'lodash/isEmpty'
+keys          = require 'lodash/keys'
+map           = require 'lodash/map'
+{ all }       = require 'rsvp'
 
 
 class FlameLib
@@ -48,9 +52,9 @@ class FlameLib
     return
 
   purge: ->
-    apps = {}
-    flames = {}
-    options = {}
+    await all(map(keys(options), (_key) =>
+      await @quench(_key)
+    ))
     return
 
 
