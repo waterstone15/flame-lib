@@ -3,6 +3,7 @@ resolves = (fn) ->
     await fn()
     ok = true
   catch e
+    # console.log e
     ok = false
   return ok
 

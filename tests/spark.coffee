@@ -253,10 +253,113 @@ describe 'Spark → errors() -', ->
     return
 
 describe 'Spark → save() -', ->
-  it '', ->
+  this.slow(1000)
+
+  it 'a spark can be saved', ->
+    fn = ->
+      await FL.purge()
+      FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
+      Flame = await FL.ignite('main')
+      Thing = Flame.shape('thing', { data: {val: { hello: null }}})
+      t1 = Thing.spark({ val: { hello: 'world' }})
+      await t1.save().write()
+      await Flame.erase('/things')
+      return
+
+    ok = await resolves(fn)
+    assert(ok, 'An error should not be thrown when saving a spark.')
+    return
+
+  it 'a flat (ungrouped) spark can be saved', ->
+    fn = ->
+      await FL.purge()
+      FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
+      Flame = await FL.ignite('main')
+      Thing = Flame.shape('thing', { data: { hello: null }}, { group: false })
+      t1 = Thing.spark({ hello: 'world' })
+      await t1.save().write()
+      await Flame.erase('/things')
+      return
+
+    ok = await resolves(fn)
+    assert(ok, 'An error should not be thrown when saving a spark.')
+    return
+
 
 describe 'Spark → update() -', ->
-  it '', ->
+  this.slow(1000)
+
+  it 'a spark can be updated', ->
+    fn = ->
+      await FL.purge()
+      FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
+      Flame = await FL.ignite('main')
+      Thing = Flame.shape('thing', { data: {val: { hello: null }}})
+      t1 = Thing.spark({ val: { hello: 'world' }})
+      await t1.save().write()
+
+      t2 = Thing.spark({ meta: { id: t1.obj().meta.id }, val: { hello: 'z' }})
+      await t2.update([ 'val.hello' ]).write()
+      await Flame.erase('/things')
+      return
+
+    ok = await resolves(fn)
+    assert(ok, 'An error should not be thrown when updating a spark.')
+    return
+
+  it 'a flat (ungrouped) spark can be updated', ->
+    fn = ->
+      await FL.purge()
+      FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
+      Flame = await FL.ignite('main')
+      Thing = Flame.shape('thing', { data: { hello: null }}, { group: false })
+      t1 = Thing.spark({ hello: 'world' })
+      await t1.save().write()
+
+      t2 = Thing.spark({ id: t1.obj().id , hello: 'z' })
+      await t2.update([ 'hello' ]).write()
+      await Flame.erase('/things')
+      return
+
+    ok = await resolves(fn)
+    assert(ok, 'An error should not be thrown when updating a flat (ungrouped) spark.')
+    return
 
 describe 'Spark → del() -', ->
-  it '', ->
+  this.slow(1000)
+
+  it 'a spark can be deleted', ->
+    fn = ->
+      await FL.purge()
+      FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
+      Flame = await FL.ignite('main')
+      Thing = Flame.shape('thing', { data: {val: { hello: null }}})
+      t1 = Thing.spark({ val: { hello: 'world' }})
+      await t1.save().write()
+
+      t2 = Thing.spark({ meta: { id: t1.obj().meta.id }})
+      await t2.del().write()
+      await Flame.erase('/things')
+      return
+
+    ok = await resolves(fn)
+    assert(ok, 'An error should not be thrown when deleting a spark.')
+    return
+
+  it 'a flat (ungrouped) spark can be deleted', ->
+    fn = ->
+      await FL.purge()
+      FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
+      Flame = await FL.ignite('main')
+      Thing = Flame.shape('thing', { data: { hello: null }}, { group: false })
+      t1 = Thing.spark({ hello: 'world' })
+      await t1.save().write()
+
+      t2 = Thing.spark({ id: t1.obj().id })
+      await t2.del().write()
+      await Flame.erase('/things')
+      return
+
+    ok = await resolves(fn)
+    assert(ok, 'An error should not be thrown when deleting a spark.')
+    return

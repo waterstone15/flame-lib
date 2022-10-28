@@ -3,6 +3,7 @@ rejects = (fn, err) ->
     await fn()
     ok = false
   catch e
+    # console.log e
     ok = (e.message == err)
   return ok
 

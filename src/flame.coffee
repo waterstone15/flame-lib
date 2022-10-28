@@ -2,6 +2,9 @@ Adapter       = require './adapter'
 Configuration = require './configuration'
 Shape         = require './shape'
 
+map           = require 'lodash/map'
+{ all }       = require 'rsvp'
+
 
 class Flame
 
@@ -15,6 +18,16 @@ class Flame
 
   wildfire: ->
     return @app.fba
+
+
+  erase: (_collection) ->
+    db = @wildfire().firestore()
+    qs = await db.collection(_collection).get()
+    await all(map((qs.docs ? []), (ds) ->
+      await db.doc("#{_collection}/#{ds.id}").delete()
+      return
+    ))
+    return true
 
 
   model: -> @shape(arguments...)

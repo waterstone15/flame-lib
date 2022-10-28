@@ -9,6 +9,7 @@ isBoolean    = require 'lodash/isBoolean'
 isEmpty      = require 'lodash/isEmpty'
 isEqual      = require 'lodash/isEqual'
 isFunction   = require 'lodash/isFunction'
+includes     = require 'lodash/includes'
 isString     = require 'lodash/isString'
 map          = require 'lodash/map'
 merge        = require 'lodash/merge'
@@ -160,6 +161,11 @@ class Shape
     obj = @obj(_data)
     updates = @obj(_data, _fields)
 
+    if includes(@config.fields, 'updated_at')
+      now = DateTime.local().setZone('utc').toISO()
+      path = (if @config.group then 'meta.' else '') + @serializer.fieldCasing('updated_at')
+      set(updates, path, now)
+
     collection = if @config.group then obj.meta.collection else obj.collection
     id = if @config.group then obj.meta.id else obj.id
     collapsed = @serializer.collapse(updates)
@@ -189,6 +195,7 @@ class Shape
     return readable
 
 
+  findAll: -> @list(arguments...)
   list: (_constraints) ->
     readable = @adapter.list(@collection, _constraints, this)
     return readable
