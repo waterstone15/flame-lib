@@ -155,7 +155,7 @@ await john.update([ 'first_name' ]).write();
 
 ### Delete
 
-To remove a record from your Firestore database, create a partial instance with just the `id` of the relevant model.
+To remove a record from your Firestore database, create an instance with just the `id` of the relevant model.
 
 ```javascript
 var john = Person.create({
