@@ -149,6 +149,7 @@ class Shape
     readable = @adapter.getAll(@collection, _ids, this)
     return readable
 
+  getOne: -> @get(arguments...)
   get: (_id) ->
     readable = @adapter.get(@collection, _id, this)
     return readable

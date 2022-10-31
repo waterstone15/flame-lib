@@ -10,37 +10,37 @@
 <hr style='height: 1px;'/>
 <br>
 
-Flame is built to simplify working with Firestore. Flame abastracts away redundant boilerplate code used for typical Firestore operations into a compact API. Flame also makes it easy to define and validate your data models.
+Flame is built to simplify working with Firestore. Flame abstracts away redundant boilerplate code used for typical Firestore operations into a compact API. Flame also makes it easy to define and validate your data models.
 
 # Benefits
 * Simple API
 * Clear, consistent data models
-* Best-practice defaults
-* Customizeable
-* Reduces Firestore-related LoC by 2~5x
-* Built in paging tools
+* Customizable
+* Reduce Firestore-related lines of code by >50%
+* Built in paging method
 
 # API
 1. [Register](#register)
 1. [Ignite](#ignite)
 1. [Quench](#quench)
-1. [Shape (aka Model)](#shape-aka-model)
-1. [Spark (aka Create)](#spark-aka-create)
-1. [Validation](#validattion)
+1. [Model (aka Shape)](#model-aka-shape)
+1. [Create (aka Spark)](#create-aka-spark)
+1. [Ok](#ok)
+1. [Errors](#errors)
 1. [Save](#save)
 1. [Update](#update)
 1. [Delete](#delete-aka-remove)
-1. [Get](#get)
+1. [Get One (aka Get)](#get-one-aka-get)
 1. [Get All](#get-all)
-1. [Find](#find)
-1. [List](#list)
+1. [Find One (aka Find)](#find-one-aka-find)
+1. [Find All (aka List)](#find-all-aka-list)
 1. [Page](#page)
 
 ## API
 
 ### Register
 
-Define and name your 'Flame apps' and their related firestore credentials.
+Define and name your 'Flame apps' and their related Firestore credentials.
 
 *Register should only be called once per Flame app in a process. Trying to register 'my-app' twice in the same process will throw an error.*
 
@@ -54,9 +54,9 @@ FL.register({
 
 ### Ignite
 
-Returns a previously registered Flame. Estabilishes the conection to Firestore if not alrady connected.
+Returns a previously registered Flame. Establishes the connection to Firestore if not already connected.
 
-*Ignite can be called repeatedly. The frist call will estabilish a connection using the related service account specified in `FL.register(...)`. Any subsequent calls will reuse that connectio*n.
+*Ignite can be called repeatedly. The first call will establish a connection using the related service account specified in `FL.register(...)`. Any subsequent calls will reuse that connection.*
 
 ```javascript
 var FL = require('flame-lib')
@@ -67,7 +67,7 @@ var Flame = await FL.ignite('main')
 
 ### Quench
 
-Releases resources for a previously ignited Flame.
+Releases resources for a previously ignited Flame. Most use cases will not nee
 
 *For most use cases, this is not necessary. However, if you regularly create and destroy connections to multiple Firestore projects, you may need to use `quench` to reduce memory pressure.*
 
@@ -75,14 +75,14 @@ Releases resources for a previously ignited Flame.
 await Flame.quench('main');
 ```
 
-### Shape (aka Model)
+### Model (aka Shape)
 
-Shape defines a model. Flame supports computed fields by using a function. The function recieves all non-computed fields provided when `spark` is called. Computed fields are persisted in Firestore when saved
+Defines a model. Flame supports computed fields by using a function. The function receives all non-computed fields provided when `create` is called. Computed fields are persisted in Firestore when saved
 
-Validators can be defined for eeach field as well (the field names must match). Validators are used by the `ok` and `error` methods. A validator function takes in a single argument, the value of the data field to validate. You cannot write validators for computed fields.
+Validators can be defined for each field as well (the field names must match). Validators are used by the `ok` and `error` methods. A validator function takes in a single argument, the value of the data field to validate. You cannot write validators for computed fields.
 
 ```javascript
-var Person = Flame.shape('Person', {
+var Person = Flame.model('Person', {
   data: {
     first_name: null,
     last_name: null,
@@ -95,19 +95,19 @@ var Person = Flame.shape('Person', {
 });
 ```
 
-### Spark (aka Create)
-Simply create a new instance of a Model. Sparks are immutable.
+### Create (aka Spark)
+Creates a new instance of a Model. Instances of a Model are immutable.
 
 ```javascript
-john = Person.spark({
+john = Person.create({
     first_name: 'John',
     last_name: 'Doe',
   },
 });
 ```
 
-### Validation
-You can check if the data supplied to a spark is valid. `ok` will check all validators by default. if a list of fields is supplied, `ok` will check just the listed fields.
+### Ok
+You can check if the data of an instance is valid. `ok()` will check all validators by default. if a list of fields is supplied, `ok(...)` will check just the listed fields.
 
 ```javascript
 john.ok();
@@ -117,6 +117,7 @@ john.ok([ 'first_name' ]);
 // => true
 ```
 
+### Errors
 The error function works simlarily. It returns an object of the fields and their error status.
 
 ```javascript
@@ -131,7 +132,7 @@ john.errors([ 'first_name' ]);
 
 Save returns a "writeable" which has a `write()` function that is used to commit to Firestore.
 
-*This two-step "intent → commit" architecture enables Flame to use the same simple API for basic writes, batch write tranactions, and read-write transactions.*
+*This two-step "intent → commit" architecture enables Flame to use the same simple API for basic writes, batch write transactions, and read-write transactions.*
 
 ```javascript
 await john.save().write();
@@ -139,10 +140,10 @@ await john.save().write();
 
 ### Update
 
-To make an update, create a partial-spark with just the `id` of the relevant model. Then use the `update` function to update specific fields.
+To make an update, create a partial-instance with just the `id` of the relevant model. Then use the `update` function to update specific fields.
 
 ```javascript
-var john = Person.spark({
+var john = Person.create({
     id: 'person-bkjh239e8adskfjhadf'
 })
 await john.update({ first_name: 'Jane' }).write();
@@ -150,7 +151,7 @@ await john.update({ first_name: 'Jane' }).write();
 
 ### Delete (aka Remove)
 
-To remove a record from your Firestor database, create a partial spark with just the `id` of the relevant model.
+To remove a record from your Firestore database, create a partial instance with just the `id` of the relevant model.
 
 ```javascript
 var john = Person.spark({
@@ -159,20 +160,20 @@ var john = Person.spark({
 await john.del().write();
 ```
 
-### Get
+### Get One (aka Get)
 
-Get returns a "readable" which has a `read()` function that is used to retrive data from Firestore.
+Get returns a "readable" which has a `read()` function that is used to retrieve data from Firestore.
 
 * The first argument is a document ID.
 * The second argument is a list of fields to include.
 
 ```javascript
-var jane = await Person.get('id').read();
+var jane = await Person.getOne('id').read();
 // => { first_name: 'Jane', first_name: 'Doe', full_name: 'Jane Doe' }
 ```
 
 ### Get All
-Get All fetches a list of documents from firestore in parallel. Assume document order is not stable.
+Get All fetches a list of documents from Firestore in parallel. Assume document order is not stable.
 
 * The first argument is a list of document IDs.
 * The second argument is a list of fields to include.
@@ -182,7 +183,7 @@ var people = await Person.getAll([ 'id', 'id', '...' ]).read();
 // => [{ first_name: 'Jane', first_name: 'Doe', full_name: 'Jane Doe' }, ...]
 ```
 
-### Find
+### Find One (aka Find)
 
 Find is used to query for a single document in Firestore. If more than one document is found, `find` will return null.
 
@@ -195,26 +196,26 @@ var john = await Person.list([['where', 'first_name', '==', 'John']], ['full_nam
 // => { full_name: 'Jane Doe' }
 ```
 
-### List
+### Find All (aka List)
 
 List is used to query Firestore for a matching set of documents.
 
-List returns a "readable" which has a `read()` function that is used to retrive data from Firestore.
+List returns a "readable" which has a `read()` function that is used to retrieve data from Firestore.
 
 * The first argument is an array of constraints.
 * The second argument is a list of fields to include.
 
 ```javascript
-var john = await Person.list([['where', 'first_name', '>', 'J']], ['full_name']).read();
+var john = await Person.findAll([['where', 'first_name', '>', 'J']], ['full_name']).read();
 
 // => [{ full_name: 'Jane Doe' }, { full_name: 'John Doe' }]
 ```
 
 ### Page
 
-Page works simlarily to list, but returns the information in a structure that is convenient for paged data interaction.
+Page works similarly to `FindAll()`, but returns the information in a structure that is convenient for paged data interaction.
 
-Page returns a "readable" which has a `read()` function that is used to retrive data from Firestore.
+Page returns a "readable" which has a `read()` function that is used to retrieve data from Firestore.
 
 ```javascript
 var page = await Person.page({
