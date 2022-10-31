@@ -57,7 +57,7 @@ FL.register({
 
 Returns a previously registered Flame app. Ignite also establishes the connection with Firestore.
 
-*Ignite can be called repeatedly. The first call will establish a connection using the related service account specified in `FL.register(...)`. Any subsequent calls will reuse that connection.*
+*Ignite can be called repeatedly. The first call will establish a connection using the related service account specified in `FL.register()`. Any subsequent calls will reuse that connection.*
 
 ```javascript
 var FL = require('flame-lib')
@@ -78,9 +78,11 @@ await Flame.release('main');
 
 ### Model
 
-Defines a model. Flame supports computed fields by using a function. The function receives all non-computed fields provided when `create` is called. Computed fields are persisted in Firestore when saved
+Defines a model. Flame supports computed fields by using a function. The function receives all non-computed fields provided when `create()` is called. Computed fields are persisted in Firestore when saved
 
-Validators can be defined for each field as well (the field names must match). Validators are used by the `ok` and `error` methods. A validator function takes in a single argument, the value of the data field to validate. You cannot write validators for computed fields.
+Validators can be defined for each field as well (the field names must match). Validators are used by the `ok()` and `error()` methods. A validator function takes in a single argument, the value of the data field to validate. You cannot write validators for computed fields.
+
+*Note: If you do not provide a validator for a field the default validator is used. The default validator always evaluates to `true`.*
 
 ```javascript
 var Person = Flame.model('Person', {
@@ -97,7 +99,7 @@ var Person = Flame.model('Person', {
 ```
 
 ### Create
-Creates a new instance of a Model. Instances of a Model are immutable.
+Creates a new instance of a Model.
 
 ```javascript
 john = Person.create({
@@ -108,7 +110,7 @@ john = Person.create({
 ```
 
 ### Ok
-You can check if the data of an instance is valid. `ok()` will check all validators by default. if a list of fields is supplied, `ok(...)` will check just the listed fields.
+You can check if the data of an instance is valid. `ok()` will check all validators by default. If a list of fields is supplied, `ok()` will check just the listed fields.
 
 ```javascript
 john.ok();
@@ -119,7 +121,7 @@ john.ok([ 'first_name' ]);
 ```
 
 ### Errors
-The error function works simlarily. It returns an object of the fields and their error status.
+Errors is similar to Ok, but `errors()` returns an object of fields that have an error. `errors() can be called with a list of fields to check just the listed fields.`
 
 ```javascript
 john.errors();
@@ -133,7 +135,7 @@ john.errors([ 'first_name' ]);
 
 Save returns a "writeable" which has a `write()` function that is used to commit to Firestore.
 
-*This two-step "intent → commit" architecture enables Flame to use the same simple API for basic writes, batch write transactions, and read-write transactions.*
+*This two-step "intent → commit" API enables Flame to use the same simple API for basic writes, batch write transactions, and read-write transactions.*
 
 ```javascript
 await john.save().write();
@@ -141,7 +143,7 @@ await john.save().write();
 
 ### Update
 
-To make an update, create a partial-instance with just the `id` of the relevant model. Then use the `update` function to update specific fields.
+To make an update, create a partial-instance with just the `id` of the relevant model. Then use `update()` to update specific fields.
 
 ```javascript
 var john = Person.create({
@@ -150,7 +152,7 @@ var john = Person.create({
 await john.update({ first_name: 'Jane' }).write();
 ```
 
-### Delete (aka Remove)
+### Delete
 
 To remove a record from your Firestore database, create a partial instance with just the `id` of the relevant model.
 
@@ -169,7 +171,7 @@ Get returns a "readable" which has a `read()` function that is used to retrieve 
 * The second argument is a list of fields to include.
 
 ```javascript
-var jane = await Person.getOne('id').read();
+var jane = await Person.get('id').read();
 // => { first_name: 'Jane', first_name: 'Doe', full_name: 'Jane Doe' }
 ```
 
@@ -186,7 +188,7 @@ var people = await Person.getAll([ 'id', 'id', '...' ]).read();
 
 ### Find
 
-Find is used to query for a single document in Firestore. If more than one document is found, `find` will return null.
+Find is used to query for a single document in Firestore. If more than one document is found, `find()` will return null.
 
 * The first argument is an array of constraints.
 * The second argument is a list of fields to include.
