@@ -121,7 +121,7 @@ john.ok([ 'first_name' ]);
 ```
 
 ### Errors
-Errors is similar to Ok, but `errors()` returns an object of fields that have an error. `errors() can be called with a list of fields to check just the listed fields.`
+Errors is similar to Ok, but `errors()` returns an object of fields that have an error. `errors()` can be called with a list of fields to check just the listed fields.
 
 ```javascript
 john.errors();
