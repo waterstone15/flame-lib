@@ -10,39 +10,40 @@
 <hr style='height: 1px;'/>
 <br>
 
-Flame is built to simplify working with Firestore. Flame abstracts away redundant boilerplate code used for typical Firestore operations into a compact API. Flame also makes it easy to define and validate your data models.
+Flame is built to simplify working with server-side Firestore. Flame abstracts away redundant boilerplate code used for typical Firestore operations into a compact API. Flame also makes it easy to define and validate your data models.
 
 # Benefits
 * Simple API
 * Clear, consistent data models
 * Customizable
 * Reduce Firestore-related lines of code by >50%
-* Built in paging method
+* Built in paging
 
 # API
-1. [Register](#register)
-1. [Ignite](#ignite)
-1. [Quench](#quench)
-1. [Model (aka Shape)](#model-aka-shape)
-1. [Create (aka Spark)](#create-aka-spark)
-1. [Ok](#ok)
-1. [Errors](#errors)
-1. [Save](#save)
-1. [Update](#update)
-1. [Delete](#delete-aka-remove)
-1. [Get One (aka Get)](#get-one-aka-get)
-1. [Get All](#get-all)
-1. [Find One (aka Find)](#find-one-aka-find)
-1. [Find All (aka List)](#find-all-aka-list)
-1. [Page](#page)
+* [Register](#register)
+* [Ignite](#ignite)
+* [Release](#release)
+* [Model](#model)
+* [Create](#create)
+* [Ok](#ok)
+* [Errors](#errors)
+* [Save](#save)
+* [Update](#update)
+* [Delete](#delete)
+* [Get](#get)
+* [Get All](#get-all)
+* [Find](#find)
+* [Find All](#find-all)
+* [Page](#page)
+
 
 ## API
 
 ### Register
 
-Define and name your 'Flame apps' and their related Firestore credentials.
+Define and name your Flame apps and their Firestore credentials.
 
-*Register should only be called once per Flame app in a process. Trying to register 'my-app' twice in the same process will throw an error.*
+*Register should only be called once per Flame app. Trying to register 'my-app' twice in the same process will throw an error.*
 
 ```javascript
 var FL = require('flame-lib')
@@ -54,7 +55,7 @@ FL.register({
 
 ### Ignite
 
-Returns a previously registered Flame. Establishes the connection to Firestore if not already connected.
+Returns a previously registered Flame app. Ignite also establishes the connection with Firestore.
 
 *Ignite can be called repeatedly. The first call will establish a connection using the related service account specified in `FL.register(...)`. Any subsequent calls will reuse that connection.*
 
@@ -65,17 +66,17 @@ var FL = require('flame-lib')
 var Flame = await FL.ignite('main')
 ```
 
-### Quench
+### Release
 
-Releases resources for a previously ignited Flame. Most use cases will not nee
+Releases resources for a previously ignited Flame.
 
-*For most use cases, this is not necessary. However, if you regularly create and destroy connections to multiple Firestore projects, you may need to use `quench` to reduce memory pressure.*
+*For most use cases, this is not necessary. However, if you regularly create and destroy connections to multiple Firestore projects, you may need to use `release()` to reduce memory pressure.*
 
 ```javascript
-await Flame.quench('main');
+await Flame.release('main');
 ```
 
-### Model (aka Shape)
+### Model
 
 Defines a model. Flame supports computed fields by using a function. The function receives all non-computed fields provided when `create` is called. Computed fields are persisted in Firestore when saved
 
@@ -95,7 +96,7 @@ var Person = Flame.model('Person', {
 });
 ```
 
-### Create (aka Spark)
+### Create
 Creates a new instance of a Model. Instances of a Model are immutable.
 
 ```javascript
@@ -154,13 +155,13 @@ await john.update({ first_name: 'Jane' }).write();
 To remove a record from your Firestore database, create a partial instance with just the `id` of the relevant model.
 
 ```javascript
-var john = Person.spark({
+var john = Person.create({
     id: 'person-bkjh239e8adskfjhadf'
 })
 await john.del().write();
 ```
 
-### Get One (aka Get)
+### Get
 
 Get returns a "readable" which has a `read()` function that is used to retrieve data from Firestore.
 
@@ -183,7 +184,7 @@ var people = await Person.getAll([ 'id', 'id', '...' ]).read();
 // => [{ first_name: 'Jane', first_name: 'Doe', full_name: 'Jane Doe' }, ...]
 ```
 
-### Find One (aka Find)
+### Find
 
 Find is used to query for a single document in Firestore. If more than one document is found, `find` will return null.
 
@@ -191,16 +192,16 @@ Find is used to query for a single document in Firestore. If more than one docum
 * The second argument is a list of fields to include.
 
 ```javascript
-var john = await Person.list([['where', 'first_name', '==', 'John']], ['full_name']).read();
+var john = await Person.find([['where', 'first_name', '==', 'John']], ['full_name']).read();
 
 // => { full_name: 'Jane Doe' }
 ```
 
-### Find All (aka List)
+### Find All
 
-List is used to query Firestore for a matching set of documents.
+Query Firestore for a matching set of documents.
 
-List returns a "readable" which has a `read()` function that is used to retrieve data from Firestore.
+`findAll()` returns a "readable" which has a `read()` function that is used to retrieve data from Firestore.
 
 * The first argument is an array of constraints.
 * The second argument is a list of fields to include.
@@ -213,9 +214,9 @@ var john = await Person.findAll([['where', 'first_name', '>', 'J']], ['full_name
 
 ### Page
 
-Page works similarly to `FindAll()`, but returns the information in a structure that is convenient for paged data interaction.
+Similar to Find all, but the resulting object is structured as paged data.
 
-Page returns a "readable" which has a `read()` function that is used to retrieve data from Firestore.
+`page()` returns a "readable" which has a `read()` function that is used to retrieve data from Firestore.
 
 ```javascript
 var page = await Person.page({
