@@ -143,13 +143,14 @@ await john.save().write();
 
 ### Update
 
-To make an update, create a partial-instance with just the `id` of the relevant model. Then use `update()` to update specific fields.
+To make an update, create a new instance with the `id` and the other fields you would like to update. Then call `update()` with the specific fields you would like to write to Firestore.
 
 ```javascript
 var john = Person.create({
-    id: 'person-bkjh239e8adskfjhadf'
+    id: 'person-bkjh239e8adskfjhadf',
+    first_name: 'Jane',
 })
-await john.update({ first_name: 'Jane' }).write();
+await john.update([ 'first_name' ]).write();
 ```
 
 ### Delete
