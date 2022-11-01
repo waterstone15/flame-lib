@@ -38,7 +38,7 @@ class Adapter
     return writeable
 
 
-  getAll: (_collection, _ids, _shape) ->
+  getAll: (_collection, _ids, _shape, _fields) ->
     readable =
       collection: _collection
       doc_refs: map(_ids, (_id) => @db.collection(_collection).doc(_id))
@@ -48,7 +48,11 @@ class Adapter
         try
           dss = await @db.getAll(@doc_refs...)
           if !isEmpty(dss)
-            expanded = map(dss, (_ds) -> _shape.serializer.expand(_ds.data()))
+            expanded = map(dss, (_ds) ->
+              ex = _shape.serializer.expand(_ds.data())
+              (ex = pick(ex, _fields)) if !isEmpty(_fields)
+              return ex
+            )
             return expanded
         catch err
           console.log err
@@ -56,7 +60,7 @@ class Adapter
         return null
 
 
-  get: (_collection, _id, _shape) ->
+  get: (_collection, _id, _shape, _fields) ->
     readable =
       collection: _collection
       doc_ref: @db.collection(_collection).doc(_id)
@@ -67,6 +71,7 @@ class Adapter
           ds = await @doc_ref.get()
           if ds.exists
             expanded = _shape.serializer.expand(ds.data())
+            (expanded = pick(expanded, _fields)) if !isEmpty(_fields)
             return expanded
         catch err
           console.log err
