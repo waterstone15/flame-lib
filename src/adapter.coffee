@@ -110,6 +110,7 @@ class Adapter
     return writeable
 
 
+  findOne: -> @find(arguments...)
   find: (_collection, _constraints = [], _shape, _fields = []) ->
     query = @db.collection(_collection)
     for c in _constraints
@@ -125,7 +126,7 @@ class Adapter
       read: ->
         try
           qs = await @query.get()
-          if !qs.emppty
+          if !qs.empty
             expanded = _shape.serializer.expand(qs.docs[0].data())
             (expanded = pick(expanded, _fields)) if !isEmpty(_fields)
             return expanded
@@ -137,6 +138,7 @@ class Adapter
     return readable
 
 
+  findAll: -> @list(arguments...)
   list: (_collection, _constraints = [], _shape) ->
     query = @db.collection(_collection)
     for c in _constraints
@@ -156,7 +158,7 @@ class Adapter
       read: ->
         try
           qs = await @query.get()
-          if !qs.emppty
+          if !qs.empty
             return map(qs.docs, (ds) ->
               expanded = _shape.serializer.expand(ds.data())
               return expanded
