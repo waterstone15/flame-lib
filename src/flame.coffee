@@ -29,6 +29,9 @@ class Flame
     ))
     return true
 
+  transact: (_f) ->
+    return await @adapter.transact(_f)
+
 
   model: -> @shape(arguments...)
   shape: (_type, _obj, _opts = {}) ->

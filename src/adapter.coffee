@@ -22,12 +22,23 @@ class Adapter
     @fba = _app.fba
 
 
+  transact: (_f) ->
+    try
+      result = await @db.runTransaction((_t) -> await _f(_t))
+      return result
+    catch err
+      console.log err
+      return null
+
+
   save: (_collection, _id, _data) ->
     writeable =
       data: _data
       doc_ref: @db.collection(_collection).doc(_id)
       type: 'create'
-      write: ->
+      write: (_t) ->
+        if _t
+          return await @writeT(_t)
         try
           await @doc_ref.create(_data)
           return true
@@ -35,6 +46,9 @@ class Adapter
           console.log err
           (->)()
         return false
+      writeT: (_t) ->
+        await _t.create(@doc_ref, _data)
+        return true
     return writeable
 
 
@@ -66,7 +80,9 @@ class Adapter
       doc_ref: @db.collection(_collection).doc(_id)
       id: _id
       type: 'get'
-      read: ->
+      read: (_t) ->
+        if _t
+          return await @readT(_t)
         try
           ds = await @doc_ref.get()
           if ds.exists
@@ -77,6 +93,13 @@ class Adapter
           console.log err
           (->)()
         return null
+      readT: (_t) ->
+        ds = await _t.get(@doc_ref)
+        if ds.exists
+          expanded = _shape.serializer.expand(ds.data())
+          (expanded = pick(expanded, _fields)) if !isEmpty(_fields)
+          return expanded
+        return null
 
 
   update: (_collection, _id, _data) ->
@@ -84,7 +107,9 @@ class Adapter
       data: _data
       doc_ref: @db.collection(_collection).doc(_id)
       type: 'update'
-      write: ->
+      write: (_t) ->
+        if _t
+          return await @writeT(_t)
         try
           await @doc_ref.update(_data)
           return true
@@ -92,6 +117,10 @@ class Adapter
           console.log err
           (->)()
         return false
+      writeT: (_t) ->
+        await _t.update(@doc_ref, _data)
+        return true
+
     return writeable
 
 
@@ -99,7 +128,9 @@ class Adapter
     writeable =
       doc_ref: @db.collection(_collection).doc(_id)
       type: 'delete'
-      write: ->
+      write: (_t) ->
+        if _t
+          return await @writeT(_t)
         try
           await @doc_ref.delete()
           return true
@@ -107,6 +138,9 @@ class Adapter
           console.log err
           (->)()
         return false
+      writeT: (_t) ->
+        await t.delete(@doc_ref)
+        return true
     return writeable
 
 
@@ -123,7 +157,9 @@ class Adapter
     readable =
       query: query
       type: 'find'
-      read: ->
+      read: (_t) ->
+        if _t
+          return await @readT(_t)
         try
           qs = await @query.get()
           if !qs.empty
@@ -133,6 +169,13 @@ class Adapter
         catch err
           console.log err
           (->)()
+        return null
+      readT: (_t) ->
+        qs = await _t.get(@query)
+        if !qs.empty
+          expanded = _shape.serializer.expand(qs.docs[0].data())
+          (expanded = pick(expanded, _fields)) if !isEmpty(_fields)
+          return expanded
         return null
 
     return readable
@@ -155,7 +198,9 @@ class Adapter
     readable =
       query: query
       type: 'list'
-      read: ->
+      read: (_t) ->
+        if _t
+          return await @readT(_t)
         try
           qs = await @query.get()
           if !qs.empty
@@ -166,6 +211,14 @@ class Adapter
         catch err
           console.log err
           (->)()
+        return null
+      readT: (_t) ->
+        qs = await _t.get(@query)
+        if !qs.empty
+          return map(qs.docs, (ds) ->
+            expanded = _shape.serializer.expand(ds.data())
+            return expanded
+          )
         return null
 
     return readable
@@ -222,12 +275,6 @@ class Adapter
         }
 
     return readable
-
-
-  # batch: (writeables) ->
-
-
-  # transaction: (fn) ->
 
 
 module.exports = Adapter
