@@ -1,24 +1,25 @@
+FlameError   = require './flame-error'
+Serializer   = require './serializer'
+Spark        = require './spark'
+
 cloneDeep    = require 'lodash/cloneDeep'
 every        = require 'lodash/every'
-FlameError   = require './flame-error'
 forEach      = require 'lodash/forEach'
 get          = require 'lodash/get'
+includes     = require 'lodash/includes'
 intersection = require 'lodash/intersection'
 isArray      = require 'lodash/isArray'
 isBoolean    = require 'lodash/isBoolean'
 isEmpty      = require 'lodash/isEmpty'
 isEqual      = require 'lodash/isEqual'
 isFunction   = require 'lodash/isFunction'
-includes     = require 'lodash/includes'
 isString     = require 'lodash/isString'
 map          = require 'lodash/map'
 merge        = require 'lodash/merge'
 omit         = require 'lodash/omit'
 pick         = require 'lodash/pick'
 random       = require '@stablelib/random'
-Serializer   = require './serializer'
 set          = require 'lodash/set'
-Spark        = require './spark'
 { DateTime } = require 'luxon'
 
 
@@ -45,7 +46,7 @@ class Shape
       throw new FlameError('Every validator must be a function that takes one argument.')
       return
 
-    @collection = @serializer.collectionCasing(_type)
+    @collection = get(_obj, 'data.meta.collection') ? (get(_obj, 'data.collection') ? @serializer.collectionCasing(_type))
     @data       = @serializer.normalize(merge(@defaultData(), _obj.data))
     @type       = @serializer.typeCasingDB(_type)
     @validators = @serializer.normalize(merge(@defaultValidators(), _obj.validators))

@@ -103,9 +103,8 @@ Creates a new instance of a Model.
 
 ```javascript
 john = Person.create({
-    first_name: 'John',
-    last_name: 'Doe',
-  },
+  first_name: 'John',
+  last_name: 'Doe',
 });
 ```
 
@@ -147,8 +146,8 @@ To make an update, create a new instance with the `id` and the other fields you 
 
 ```javascript
 var john = Person.create({
-    id: 'person-bkjh239e8adskfjhadf',
-    first_name: 'Jane',
+  id: 'person-bkjh239e8adskfjhadf',
+  first_name: 'Jane',
 })
 await john.update([ 'first_name' ]).write();
 ```

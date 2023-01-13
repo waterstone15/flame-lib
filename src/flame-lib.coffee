@@ -1,6 +1,7 @@
 FirebaseApp   = require './firebase-app'
 Flame         = require './flame'
 FlameError    = require './flame-error'
+
 forEach       = require 'lodash/forEach'
 isEmpty       = require 'lodash/isEmpty'
 keys          = require 'lodash/keys'
@@ -25,8 +26,8 @@ class FlameLib
   init: (_name) ->
     app = apps[_name]
     if !app
-      { fba, db } = await FirebaseApp::create(_name, options[_name])
-      apps[_name] = { fba, db }
+      { fba, db, FV } = await FirebaseApp::create(_name, options[_name])
+      apps[_name] = { fba, db, FV }
     return
 
   ignite: (_name) ->

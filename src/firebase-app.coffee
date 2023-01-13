@@ -10,6 +10,6 @@ class FirebaseApp
 
     fba = await FBA.initializeApp(fb_cfg, _name)
     db  = FS.getFirestore(fba)
-    return { fba, db }
+    return { fba, db, FV: FS.FieldValue }
 
 module.exports = FirebaseApp

@@ -16,6 +16,10 @@ class Flame
     return
 
 
+  FV: ->
+    return @app.FV
+
+
   wildfire: ->
     return @app.fba
 
@@ -28,6 +32,7 @@ class Flame
       return
     ))
     return true
+
 
   transact: (_f) ->
     return await @adapter.transact(_f)
