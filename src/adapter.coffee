@@ -324,18 +324,19 @@ class Adapter
           else
             null
         
-        
-        items = reverse(items) if at_end
+
+        (items = reverse(items)) if at_end
+        items = take(items, size)
 
         return {
           collection:
             first: col_first
-            last: col_last
-          next: next
+            last:  col_last
           page:
             first: first(items)
-            items: take(items, size)
-            last: nth(items, (items.length - size - 1))
+            items: items
+            last:  last(items)
+          next: next
           prev: prev
         }
 
