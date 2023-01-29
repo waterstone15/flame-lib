@@ -16,6 +16,7 @@
     }
   },
   "scripts": {
+    "build": "yarn compile",
     "bump": "bump --tag",
     "compile": "run-s compile:coffee",
     "compile:coffee": "./node_modules/coffeescript/bin/coffee --compile --no-header --output ./lib ./src",
