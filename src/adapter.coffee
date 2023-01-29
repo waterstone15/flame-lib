@@ -273,8 +273,8 @@ class Adapter
           col_fstQ = [...col_fstQ, [ 'order-by', field, (if is_rev then 'desc' else 'asc') ]]
           col_lstQ = [...col_lstQ, [ 'order-by', field, (if is_rev then 'asc' else 'desc') ]]
           
-          itemsQ   = [...itemsQ,   [ 'order-by', field, (if is_rev then 'desc' else 'asc') ]]
-          itemsQ   = [...itemsQ,   [ 'start-at', cdoc]]
+          itemsQ   = [...itemsQ,   [ 'order-by', field, (if ((is_rev && !at_end) || (!is_rev && at_end)) then 'desc' else 'asc') ]]
+          itemsQ   = [...itemsQ,   [ 'start-at', cdoc ]]
           
           (nextQ   = [...nextQ,    [ 'order-by', field, 'asc'  ]]) if (!is_rev && at_end)
           (nextQ   = [...nextQ,    [ 'order-by', field, 'desc' ]]) if (is_rev && at_end)
@@ -324,8 +324,8 @@ class Adapter
           else
             null
         
-        # items = sortBy(items, fields)
-        # (items = reverse(items, fields)) if (field && is_rev)
+        
+        items = reverse(items) if at_end
 
         return {
           collection:
