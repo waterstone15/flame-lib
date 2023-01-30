@@ -164,14 +164,17 @@ class Shape
     obj = @.obj(_data)
     updates = @.obj(_data, _fields)
 
-    if includes(@.config.fields, 'updated_at')
-      now = DateTime.local().setZone('utc').toISO()
-      path = (if @.config.group then 'meta.' else '') + @.serializer.fieldCasing('updated_at')
-      set(updates, path, now)
+    prefix = if @.config.group then 'meta.' else ''
 
-    if includes(@.config.fields, 'created_at')
-      path = (if @.config.group then 'meta.' else '') + @.serializer.fieldCasing('created_at')
-      unset(updates, path)
+    ca_path = prefix + @.serializer.fieldCasing('created_at')
+    if includes(@.config.fields, 'created_at') && !includes(_fields, ca_path)
+      unset(updates, ca_path)
+
+    ua_path = prefix + @.serializer.fieldCasing('updated_at')
+    console.log _fields, ua_path
+    if includes(@.config.fields, 'updated_at') && !includes(_fields, ua_path)
+      now = DateTime.local().setZone('utc').toISO()
+      set(updates, ua_path, now)
 
     collection = if @.config.group then obj.meta.collection else obj.collection
     id = if @.config.group then obj.meta.id else obj.id
