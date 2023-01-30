@@ -171,7 +171,6 @@ class Shape
       unset(updates, ca_path)
 
     ua_path = prefix + @.serializer.fieldCasing('updated_at')
-    console.log _fields, ua_path
     if includes(@.config.fields, 'updated_at') && !includes(_fields, ua_path)
       now = DateTime.local().setZone('utc').toISO()
       set(updates, ua_path, now)
@@ -220,5 +219,6 @@ class Shape
 
 
   # q: ->
+
 
 module.exports = Shape
