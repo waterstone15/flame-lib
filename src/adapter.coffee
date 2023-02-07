@@ -311,7 +311,7 @@ class Adapter
         prev = switch
           when cursor && field && !at_end
             prev
-          when at_end && items.length > size
+          when at_end && items && (items.length > size)
             nth(items, -1) 
           else
             null
@@ -319,7 +319,7 @@ class Adapter
         next = switch
           when cursor && field && at_end
             next
-          when !at_end && items.length > size
+          when !at_end && items && (items.length > size)
             nth(items, -1) 
           else
             null
