@@ -62,12 +62,14 @@ class Adapter
       db: @.db
       type: 'getAll'
       read: ->
+        if @.doc_refs.length <= 0
+          return null
         try
           dss = await @.db.getAll(@.doc_refs...)
           if !isEmpty(dss)
             expanded = map(dss, (_ds) ->
               ex = _shape.serializer.expand(_ds.data())
-              (ex = pick(ex, _fields)) if !isEmpty(_fields)
+              (ex = (pick ex, _fields)) if !(isEmpty _fields)
               return ex
             )
             return expanded
