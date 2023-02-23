@@ -230,6 +230,40 @@ class Adapter
 
     return readable
 
+  count: (_collection, _constraints = [], _shape) ->
+    query = @.db.collection(_collection)
+    for c in _constraints
+      [ type, rest... ] = c
+      if includes([ 'order-by', 'where', ], type)
+        rest[0] = _shape.serializer.pathCasingDB(rest[0])
+        query = query[camelCase(type)](rest...)
+      if includes([ 'end-at', 'end-before', 'start-after', 'start-at', ], type)
+        query = query[camelCase(type)](rest...)
+    query = query.count()
+
+    readable =
+      query: query
+      type: 'count'
+      read: (_t) ->
+        if _t
+          return await @.readT(_t)
+        try
+          qs = await @.query.get()
+          if qs.data?().count?
+            return qs.data().count
+          return null
+        catch err
+          console.log err
+          (->)()
+        return null
+      readT: (_t) ->
+        qs = await _t.get(@.query)
+        if qs.data?().count?
+          return qs.data().count
+        return null
+
+    return readable
+
   
   page: (_opts, _collection, _shape) ->
 

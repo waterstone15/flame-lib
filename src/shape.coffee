@@ -203,6 +203,9 @@ class Shape
     readable = @.adapter.find(@.collection, _constraints, @, _fields)
     return readable
 
+  count: (_constraints) ->
+    readable = @.adapter.count(@.collection, _constraints, @)
+    return readable
 
   findAll: -> @.list(arguments...)
   list: (_constraints) ->
