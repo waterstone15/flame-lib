@@ -48,24 +48,24 @@
   ({DateTime} = require('luxon'));
 
   Shape = class Shape {
-    constructor(_adapter, _type, _obj, _config) {
+    constructor(_adapter, _type, _obj, _settings) {
       var defaultValidator, default_validators, ref, ref1, validatorsOk;
       this.adapter = _adapter;
-      this.config = _config;
-      this.serializer = new Serializer(_config);
+      this.settings = _settings;
+      this.serializer = new Serializer(_settings);
       defaultValidator = function(_d) {
         return true;
       };
       default_validators = {};
       forEach(this.serializer.paths(_obj.data), function(_p) {
-        if (!isFunction(get(_obj, `validators.${_p}`))) {
+        if (!(isFunction(get(_obj, `validators.${_p}`)))) {
           set(_obj, `validators.${_p}`, defaultValidator);
         }
       });
       validatorsOk = every(this.serializer.paths(_obj.validators), function(_p) {
         var v;
         v = get(_obj.validators, _p);
-        return isFunction(v) && v.length === 1;
+        return (isFunction(v)) && v.length === 1;
       });
       if (!validatorsOk) {
         throw new FlameError('Every validator must be a function that takes one argument.');
@@ -109,13 +109,13 @@
           return '1.0.0';
         }
       };
-      if (this.config.group) {
+      if (this.settings.group) {
         df = {
           meta: df
         };
       }
-      fs = map(this.config.fields, (_f) => {
-        if (this.config.group) {
+      fs = map(this.settings.fields, (_f) => {
+        if (this.settings.group) {
           return `meta.${_f}`;
         } else {
           return _f;
@@ -128,34 +128,34 @@
       var df;
       df = {
         collection: function(_v) {
-          return !isEmpty(_v) && isString(_v);
+          return !(isEmpty(_v)) && (isString(_v));
         },
         created_at: function(_v) {
-          return (_v === null) || (!isEmpty(_v) && isString(_v));
+          return (_v === null) || (!(isEmpty(_v)) && (isString(_v)));
         },
         deleted: function(_v) {
           return isBoolean(_v);
         },
         deleted_at: function(_v) {
-          return (_v === null) || (!isEmpty(_v) && isString(_v));
+          return (_v === null) || (!(isEmpty(_v)) && (isString(_v)));
         },
         id: function(_v) {
-          return !isEmpty(_v) && isString(_v);
+          return !(isEmpty(_v)) && (isString(_v));
         },
         idempotency_key: function(_v) {
-          return isEmpty(_v) || (!isEmpty(_v) && isString(_v));
+          return (isEmpty(_v)) || (!(isEmpty(_v)) && (isString(_v)));
         },
         type: function(_v) {
-          return !isEmpty(_v) && isString(_v);
+          return !(isEmpty(_v)) && (isString(_v));
         },
         updated_at: function(_v) {
-          return (_v === null) || (!isEmpty(_v) && isString(_v));
+          return (_v === null) || (!(isEmpty(_v)) && (isString(_v)));
         },
         v: function(_v) {
-          return !isEmpty(_v) && isString(_v);
+          return !(isEmpty(_v)) && (isString(_v));
         }
       };
-      if (this.config.group) {
+      if (this.settings.group) {
         df = {
           meta: df
         };
@@ -164,8 +164,8 @@
     }
 
     defaultPaths() {
-      return map(this.config.fields, (_f) => {
-        if (this.config.group) {
+      return map(this.settings.fields, (_f) => {
+        if (this.settings.group) {
           return `meta.${_f}`;
         } else {
           return _f;
@@ -173,15 +173,17 @@
       });
     }
 
-    extend(_type, _obj, _opts = {}) {
-      var config, obj;
-      obj = merge({
+    extend(_type, _obj, _settings = {}) {
+      var d, obj, settings, v;
+      d = {
         data: omit(cloneDeep(this.data), this.defaultPaths())
-      }, {
+      };
+      v = {
         validators: omit(cloneDeep(this.validators), this.defaultPaths())
-      }, _obj);
-      config = this.config.extend(_opts);
-      return new Shape(this.adapter, _type, obj, config);
+      };
+      obj = merge(d, v, _obj);
+      settings = this.settings.extend(_settings);
+      return new Shape(this.adapter, _type, obj, settings);
     }
 
     errors(_data, _fields) {
@@ -226,12 +228,12 @@
 
     save(_data) {
       var collapsed, collection, id, obj, writable;
-      if (!this.ok(_data)) {
+      if (!(this.ok(_data))) {
         return null;
       }
       obj = this.obj(_data);
-      collection = this.config.group ? obj.meta.collection : obj.collection;
-      id = this.config.group ? obj.meta.id : obj.id;
+      collection = this.settings.group ? obj.meta.collection : obj.collection;
+      id = this.settings.group ? obj.meta.id : obj.id;
       collapsed = this.serializer.collapse(obj);
       writable = this.adapter.save(collection, id, collapsed);
       return writable;
@@ -255,23 +257,23 @@
 
     update(_data, _fields) {
       var ca_path, collapsed, collection, id, now, obj, prefix, ua_path, updates, writable;
-      if (!this.ok(_data, _fields) || _fields === null) {
+      if (!(this.ok(_data, _fields)) || _fields === null) {
         return null;
       }
       obj = this.obj(_data);
       updates = this.obj(_data, _fields);
-      prefix = this.config.group ? 'meta.' : '';
-      ca_path = prefix + this.serializer.fieldCasing('created_at');
-      if (includes(this.config.fields, 'created_at') && !includes(_fields, ca_path)) {
+      prefix = this.settings.group ? 'meta.' : '';
+      ca_path = prefix + (this.serializer.fieldCasing('created_at'));
+      if ((includes(this.settings.fields, 'created_at')) && !(includes(_fields, ca_path))) {
         unset(updates, ca_path);
       }
-      ua_path = prefix + this.serializer.fieldCasing('updated_at');
-      if (includes(this.config.fields, 'updated_at') && !includes(_fields, ua_path)) {
+      ua_path = prefix + (this.serializer.fieldCasing('updated_at'));
+      if ((includes(this.settings.fields, 'updated_at')) && !(includes(_fields, ua_path))) {
         now = DateTime.local().setZone('utc').toISO();
         set(updates, ua_path, now);
       }
-      collection = this.config.group ? obj.meta.collection : obj.collection;
-      id = this.config.group ? obj.meta.id : obj.id;
+      collection = this.settings.group ? obj.meta.collection : obj.collection;
+      id = this.settings.group ? obj.meta.id : obj.id;
       collapsed = this.serializer.collapse(updates);
       writable = this.adapter.update(collection, id, collapsed);
       return writable;
@@ -284,8 +286,8 @@
     del(_data) {
       var collection, id, obj, writable;
       obj = this.obj(_data);
-      collection = this.config.group ? obj.meta.collection : obj.collection;
-      id = this.config.group ? obj.meta.id : obj.id;
+      collection = this.settings.group ? obj.meta.collection : obj.collection;
+      id = this.settings.group ? obj.meta.id : obj.id;
       writable = this.adapter.del(collection, id);
       return writable;
     }

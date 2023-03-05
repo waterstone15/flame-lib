@@ -31,12 +31,12 @@
     var casing;
 
     class Serializer {
-      constructor(_config) {
-        this.cfg = _config;
+      constructor(_settings) {
+        this.settings = _settings;
       }
 
       collectionCasing(_str) {
-        if (this.cfg.pluralize) {
+        if (this.settings.pluralize) {
           return pluralize(this.typeCasingDB(_str));
         } else {
           return this.typeCasingDB(_str);
@@ -44,27 +44,27 @@
       }
 
       fieldCasing(_str) {
-        return casing[this.cfg.field_case](_str);
+        return casing[this.settings.field_case](_str);
       }
 
       fieldCasingDB(_str) {
-        return casing[this.cfg.field_case_db](_str);
+        return casing[this.settings.field_case_db](_str);
       }
 
       typeCasing(_str) {
-        return casing[this.cfg.type_case](_str);
+        return casing[this.settings.type_case](_str);
       }
 
       typeCasingDB(_str) {
-        return casing[this.cfg.type_case_db](_str);
+        return casing[this.settings.type_case_db](_str);
       }
 
       pathCasingDB(_str) {
         var group, key, tail;
-        if (this.cfg.group) {
+        if (this.settings.group) {
           [group, ...tail] = split(_str, '.');
           key = join(tail, '.');
-          return `${this.fieldCasingDB(group)}${this.cfg.separator}${this.fieldCasingDB(key)}`;
+          return `${this.fieldCasingDB(group)}${this.settings.separator}${this.fieldCasingDB(key)}`;
         } else {
           return this.fieldCasingDB(_str);
         }
@@ -73,8 +73,8 @@
       normalize(_obj) {
         var _g, _k, i, j, k, len, len1, len2, obj, ref, ref1, ref2;
         obj = {};
-        if (this.cfg.group) {
-          ref = this.cfg.groups;
+        if (this.settings.group) {
+          ref = this.settings.groups;
           for (i = 0, len = ref.length; i < len; i++) {
             _g = ref[i];
             ref1 = keys(_obj[_g]);
@@ -94,8 +94,8 @@
       }
 
       paths(_obj) {
-        if (this.cfg.group) {
-          return sortBy(flatten(map(this.cfg.groups, function(_g) {
+        if (this.settings.group) {
+          return sortBy(flatten(map(this.settings.groups, function(_g) {
             return map(keys(_obj[_g]), function(_k) {
               return `${_g}.${_k}`;
             });
@@ -111,9 +111,9 @@
         ref = keys(_obj);
         for (i = 0, len = ref.length; i < len; i++) {
           _k = ref[i];
-          if (this.cfg.group) {
-            [group] = split(_k, this.cfg.separator, 1);
-            separator_escaped = this.cfg.separator.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+          if (this.settings.group) {
+            [group] = split(_k, this.settings.separator, 1);
+            separator_escaped = this.settings.separator.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
             tail = replace(_k, new RegExp(`[a-z]+(${separator_escaped})`), '');
             key = join(tail, '');
             set(obj, `${this.fieldCasing(group)}.${this.fieldCasing(key)}`, _obj[_k]);
@@ -127,14 +127,14 @@
       collapse(_obj) {
         var _g, _k, i, j, k, key, len, len1, len2, obj, ref, ref1, ref2;
         obj = {};
-        if (this.cfg.group) {
-          ref = this.cfg.groups;
+        if (this.settings.group) {
+          ref = this.settings.groups;
           for (i = 0, len = ref.length; i < len; i++) {
             _g = ref[i];
             ref1 = keys(_obj[_g]);
             for (j = 0, len1 = ref1.length; j < len1; j++) {
               _k = ref1[j];
-              key = `${this.fieldCasingDB(_g)}${this.cfg.separator}${this.fieldCasingDB(_k)}`;
+              key = `${this.fieldCasingDB(_g)}${this.settings.separator}${this.fieldCasingDB(_k)}`;
               obj[key] = _obj[_g][_k];
             }
           }

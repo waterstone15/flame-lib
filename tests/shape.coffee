@@ -20,7 +20,7 @@ describe 'Shape → spark() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: 'world' }}})
       t1 = Thing.spark({ val: { hello: 'banana' }})
 
@@ -32,7 +32,7 @@ describe 'Shape → spark() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: 'world' }}})
       t1 = Thing.spark({ val: { hello: 'banana' }})
       t2 = Thing.spark({ val: { hello: 'bananas' }})
@@ -48,7 +48,7 @@ describe 'Shape → get() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: null }}})
       t1 = Thing.spark({ val: { hello: 'world' }})
       await t1.save().write()
@@ -65,7 +65,7 @@ describe 'Shape → get() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: null }}, { group: false })
       t1 = Thing.spark({ hello: 'world' })
       await t1.save().write()
@@ -86,7 +86,7 @@ describe 'Shape → getAll() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: null }}})
 
       t1 = Thing.spark({ val: { hello: 'world' }})
@@ -107,7 +107,7 @@ describe 'Shape → getAll() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: null }}, { group: false })
 
       t1 = Thing.spark({ hello: 'world' })
@@ -131,7 +131,7 @@ describe 'Shape → find() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: null }}})
 
       t1 = Thing.spark({ val: { hello: 'world' }})
@@ -149,7 +149,7 @@ describe 'Shape → find() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: null }}, { group: false })
 
       t1 = Thing.spark({ hello: 'world' })
@@ -170,7 +170,7 @@ describe 'Shape → list() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: null }}})
 
       t1 = Thing.spark({ val: { hello: 'world' }})
@@ -191,7 +191,7 @@ describe 'Shape → list() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: null }}, { group: false })
 
       t1 = Thing.spark({ hello: 'world' })
@@ -216,7 +216,7 @@ describe 'Shape → page() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: null }}})
 
 
@@ -238,7 +238,7 @@ describe 'Shape → page() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: null }}, { group: false })
 
 

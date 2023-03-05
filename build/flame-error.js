@@ -2,8 +2,8 @@
   var FlameError;
 
   FlameError = class FlameError extends Error {
-    constructor(_message) {
-      super(_message);
+    constructor(...args) {
+      super(...args);
       this.name = "FlameError";
       return;
     }

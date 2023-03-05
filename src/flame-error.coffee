@@ -1,7 +1,9 @@
+
 class FlameError extends Error
-  constructor: (_message) ->
-    super(_message)
-    @name = "FlameError"
+  
+  constructor: (...args) ->
+    (super ...args)
+    @.name = "FlameError"
     return
 
 module.exports = FlameError

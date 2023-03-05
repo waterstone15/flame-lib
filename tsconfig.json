@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "commonjs",
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": false,
+    "target": "ES2015"
+  },
+  "include": [ "build/**/*.ts" ]
+}

@@ -20,7 +20,7 @@ describe 'Spark → obj() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: 'world' }}})
       t1 = Thing.spark({ val: { hello: 'banana' }})
       return t1.obj().val.hello == 'banana'
@@ -33,7 +33,7 @@ describe 'Spark → obj() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: 'world' }}, { group: false })
       t1 = Thing.spark({ hello: 'banana' })
       return t1.obj().hello == 'banana'
@@ -47,7 +47,7 @@ describe 'Spark → ok() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: 'world' }}})
       t1 = Thing.spark({ val: { hello: 'banana' }})
       return t1.ok() == true
@@ -60,7 +60,7 @@ describe 'Spark → ok() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: 'world' }}, { group: false })
       t1 = Thing.spark({ hello: 'banana' })
       return t1.ok() == true
@@ -73,7 +73,7 @@ describe 'Spark → ok() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: 'world' }}, validators: { val: { hello: (_d) -> false }}})
       t1 = Thing.spark({ val: { hello: 'banana' }})
       return t1.ok() == false
@@ -86,7 +86,7 @@ describe 'Spark → ok() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: 'world' }, validators: { hello: (_d) -> false }}, { group: false })
       t1 = Thing.spark({ hello: 'banana' })
       return t1.ok() == false
@@ -99,7 +99,7 @@ describe 'Spark → ok() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: 'world' }}})
       t1 = Thing.spark({ val: { hello: 'banana' }})
       return t1.ok([ 'val.hello' ]) == true
@@ -112,7 +112,7 @@ describe 'Spark → ok() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: 'world' }}, { group: false })
       t1 = Thing.spark({ hello: 'banana' })
       return t1.ok([ 'hello' ]) == true
@@ -125,7 +125,7 @@ describe 'Spark → ok() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: 'world' }}, validators: { val: { hello: (_d) -> false }}})
       t1 = Thing.spark({ val: { hello: 'banana' }})
       return t1.ok([ 'val.hello' ]) == false
@@ -138,7 +138,7 @@ describe 'Spark → ok() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: 'world' }, validators: { hello: (_d) -> false }}, { group: false })
       t1 = Thing.spark({ hello: 'banana' })
       return t1.ok([ 'hello' ]) == false
@@ -152,7 +152,7 @@ describe 'Spark → errors() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: 'world' }}})
       t1 = Thing.spark({ val: { hello: 'banana' }})
       return isEmpty(t1.errors())
@@ -165,7 +165,7 @@ describe 'Spark → errors() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: 'world' }}, { group: false })
       t1 = Thing.spark({ hello: 'banana' })
       return isEmpty(t1.errors())
@@ -178,7 +178,7 @@ describe 'Spark → errors() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: 'world' }}, validators: { val: { hello: (_d) -> false }}})
       t1 = Thing.spark({ val: { hello: 'banana' }})
       return t1.errors().val.hello == true
@@ -191,7 +191,7 @@ describe 'Spark → errors() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: 'world' }, validators: { hello: (_d) -> false }}, { group: false })
       t1 = Thing.spark({ hello: 'banana' })
       return t1.errors().hello == true
@@ -204,7 +204,7 @@ describe 'Spark → errors() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: 'world' }}})
       t1 = Thing.spark({ val: { hello: 'banana' }})
       return isEmpty(t1.errors([ 'val.hello' ]))
@@ -217,7 +217,7 @@ describe 'Spark → errors() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: 'world' }}, { group: false })
       t1 = Thing.spark({ hello: 'banana' })
       return isEmpty(t1.errors([ 'hello' ]))
@@ -230,7 +230,7 @@ describe 'Spark → errors() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: 'world' }}, validators: { val: { hello: (_d) -> false }}})
       t1 = Thing.spark({ val: { hello: 'banana' }})
       return t1.errors([ 'val.hello' ]).val.hello == true
@@ -243,7 +243,7 @@ describe 'Spark → errors() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: 'world' }, validators: { hello: (_d) -> false }}, { group: false })
       t1 = Thing.spark({ hello: 'banana' })
       return t1.errors([ 'hello' ]).hello == true
@@ -259,7 +259,7 @@ describe 'Spark → save() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: {val: { hello: null }}})
       t1 = Thing.spark({ val: { hello: 'world' }})
       await t1.save().write()
@@ -274,7 +274,7 @@ describe 'Spark → save() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: null }}, { group: false })
       t1 = Thing.spark({ hello: 'world' })
       await t1.save().write()
@@ -293,7 +293,7 @@ describe 'Spark → update() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: {val: { hello: null }}})
       t1 = Thing.spark({ val: { hello: 'world' }})
       await t1.save().write()
@@ -311,7 +311,7 @@ describe 'Spark → update() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: null }}, { group: false })
       t1 = Thing.spark({ hello: 'world' })
       await t1.save().write()
@@ -332,7 +332,7 @@ describe 'Spark → del() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: {val: { hello: null }}})
       t1 = Thing.spark({ val: { hello: 'world' }})
       await t1.save().write()
@@ -350,7 +350,7 @@ describe 'Spark → del() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: null }}, { group: false })
       t1 = Thing.spark({ hello: 'world' })
       await t1.save().write()

@@ -17,7 +17,7 @@ describe 'Flame → shape() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { val: { hello: 'world' }}})
 
     ok = await resolves(fn)
@@ -29,7 +29,7 @@ describe 'Flame → shape() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', { data: { hello: 'world' }}, { group: false })
 
     ok = await resolves(fn)
@@ -40,7 +40,7 @@ describe 'Flame → shape() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', {
         data:
           val:
@@ -56,7 +56,7 @@ describe 'Flame → shape() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', {
         data:
           hello: 'world'
@@ -71,7 +71,7 @@ describe 'Flame → shape() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', {
         data: { val: { hello: 'world' }}
         validators: { val: { hello: (_v) -> true }}
@@ -85,7 +85,7 @@ describe 'Flame → shape() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', {
         data: { hello: 'world' }
         validators: { hello: (_v) -> true }
@@ -100,7 +100,7 @@ describe 'Flame → shape() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', {
         data: { val: { hello: 'world' }}
         validators: { val: { hello: () -> true }}
@@ -115,7 +115,7 @@ describe 'Flame → shape() -', ->
     fn = ->
       await FL.purge()
       FL.register({ 'main': { service_account: JSON.parse(process.env.FIREBASE_CONFIG) } })
-      Flame = await FL.ignite('main')
+      Flame = FL.ignite('main')
       Thing = Flame.shape('thing', {
         data: { hello: 'world' }
         validators: { hello: () -> true }

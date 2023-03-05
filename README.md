@@ -63,7 +63,7 @@ Returns a previously registered Flame app. Ignite also establishes the connectio
 var FL = require('flame-lib')
 
 // This will only work if 'main' is already registered.
-var Flame = await FL.ignite('main')
+var Flame = FL.ignite('main')
 ```
 
 ### Release

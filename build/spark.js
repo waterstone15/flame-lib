@@ -6,10 +6,10 @@
   pick = require('lodash/pick');
 
   Spark = class Spark {
-    constructor(_data, shape) {
-      this.shape = shape;
-      this.data = this.shape.serializer.normalize(pick(_data, this.shape.serializer.paths(this.shape.data)));
-      this.spark = this.shape.obj(this.data);
+    constructor(_data, _shape) {
+      this.shape = _shape;
+      this.data = _shape.serializer.normalize(pick(_data, _shape.serializer.paths(_shape.data)));
+      this.spark = _shape.obj(this.data);
       return;
     }
 

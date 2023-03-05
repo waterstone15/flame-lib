@@ -47,9 +47,9 @@
       async transact(_f) {
         var err, result;
         try {
-          result = (await this.db.runTransaction(async function(_t) {
+          result = (await this.db.runTransaction((async function(_t) {
             return (await _f(_t));
-          }));
+          })));
           return result;
         } catch (error) {
           err = error;
@@ -70,7 +70,7 @@
               return (await this.writeT(_t));
             }
             try {
-              await this.doc_ref.create(_data);
+              await (this.doc_ref.create(_data));
               return true;
             } catch (error) {
               err = error;
@@ -80,7 +80,7 @@
             return false;
           },
           writeT: async function(_t) {
-            await _t.create(this.doc_ref, _data);
+            await (_t.create(this.doc_ref, _data));
             return true;
           }
         };
@@ -103,7 +103,7 @@
             }
             try {
               dss = (await this.db.getAll(...this.doc_refs));
-              if (!isEmpty(dss)) {
+              if (!(isEmpty(dss))) {
                 expanded = map(dss, function(_ds) {
                   var ex;
                   ex = _shape.serializer.expand(_ds.data());
@@ -140,7 +140,7 @@
               ds = (await this.doc_ref.get());
               if (ds.exists) {
                 expanded = _shape.serializer.expand(ds.data());
-                if (!isEmpty(_fields)) {
+                if (!(isEmpty(_fields))) {
                   (expanded = pick(expanded, _fields));
                 }
                 return expanded;
@@ -157,7 +157,7 @@
             ds = (await _t.get(this.doc_ref));
             if (ds.exists) {
               expanded = _shape.serializer.expand(ds.data());
-              if (!isEmpty(_fields)) {
+              if (!(isEmpty(_fields))) {
                 (expanded = pick(expanded, _fields));
               }
               return expanded;
@@ -189,7 +189,7 @@
             return false;
           },
           writeT: async function(_t) {
-            await _t.update(this.doc_ref, _data);
+            (await _t.update(this.doc_ref, _data));
             return true;
           }
         };
@@ -217,7 +217,7 @@
             return false;
           },
           writeT: async function(_t) {
-            await t.delete(this.doc_ref);
+            (await t.delete(this.doc_ref));
             return true;
           }
         };
@@ -255,7 +255,7 @@
               qs = (await this.query.get());
               if (!qs.empty) {
                 expanded = _shape.serializer.expand(qs.docs[0].data());
-                if (!isEmpty(_fields)) {
+                if (!(isEmpty(_fields))) {
                   (expanded = pick(expanded, _fields));
                 }
                 return expanded;
@@ -272,7 +272,7 @@
             qs = (await _t.get(this.query));
             if (!qs.empty) {
               expanded = _shape.serializer.expand(qs.docs[0].data());
-              if (!isEmpty(_fields)) {
+              if (!(isEmpty(_fields))) {
                 (expanded = pick(expanded, _fields));
               }
               return expanded;
@@ -402,9 +402,9 @@
           read: async() => {
             var Q, at_end, cdoc, col_first, col_fstQ, col_last, col_lstQ, cursor, field, fields, ignore, is_rev, items, itemsQ, next, nextQ, prev, prevQ, ref, ref1, ref2, ref3, ref4, size;
             ignore = ['end-before', 'end-at', 'limit', 'order-by', 'start-after', 'start-at'];
-            Q = isArray(_opts.constraints) ? _opts.constraints : [];
+            Q = (isArray(_opts.constraints)) ? _opts.constraints : [];
             Q = filter(Q, function(_c) {
-              return !includes(ignore, _c[0]);
+              return !(includes(ignore, _c[0]));
             });
             col_fstQ = cloneDeep(Q);
             col_lstQ = cloneDeep(Q);
@@ -454,8 +454,8 @@
                 (prevQ = [...prevQ, ['start-after', cdoc]]);
               }
             }
-            fields = isArray(_opts.fields) ? _opts.fields : [];
-            size = (isInteger(_opts.size) && _opts.size > 0) ? _opts.size : 1;
+            fields = (isArray(_opts.fields)) ? _opts.fields : [];
+            size = ((isInteger(_opts.size)) && _opts.size > 0) ? _opts.size : 1;
             if (!isEmpty(fields)) {
               col_fstQ = [...col_fstQ, ['select', ...fields]];
               col_lstQ = [...col_lstQ, ['select', ...fields]];

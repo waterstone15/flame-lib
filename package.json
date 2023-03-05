@@ -11,17 +11,25 @@
   },
   "exports": {
     ".": {
-      "import": "./lib/flame-lib.js",
-      "require": "./lib/flame-lib.js"
+      "import": "./build/flame-lib.js",
+      "require": "./build/flame-lib.js"
     }
   },
   "scripts": {
-    "build": "yarn compile",
+    "prepublish": "yarn compile",
     "bump": "bump --tag",
-    "compile": "run-s compile:coffee",
-    "compile:coffee": "./node_modules/coffeescript/bin/coffee --compile --no-header --output ./lib ./src",
-    "test": "run-s compile && mocha --require coffeescript/register --reporter list ./tests/**/*.coffee",
-    "test:wip": "run-s compile && mocha --require coffeescript/register --reporter list ./tests/wip.coffee"
+    "compile:civet": "node builder.mjs",
+    "compile:coffee": "yarn coffee --compile --no-header --output ./build ./src",
+    "compile": "run-p compile:civet compile:coffee",
+    "go": "infisical run --env=dev node ./build/flame-lib.js",
+    "s": "yarn watch",
+    "test:wip": "",
+    "test": "",
+    "watch:all": "run-p watch:build watch:coffee watch:civet",
+    "watch:build": "chokidar --debounce 500 \"./build/**/*.js\" -c \"yarn go\"",
+    "watch:civet": "chokidar --debounce 500 \"./src/**/*.civet\" -c \"yarn compile:civet\"",
+    "watch:coffee": "chokidar --debounce 500 \"./src/**/*.coffee\" -c \"yarn compile:coffee\"",
+    "watch": "run-s compile watch:all"
   },
   "private": false,
   "dependencies": {
@@ -34,13 +42,19 @@
     "rsvp": "^4.8.5"
   },
   "devDependencies": {
+    "@danielx/civet": "^0.5.82",
     "@jsdevtools/version-bump-prompt": "^6.1.0",
+    "@types/lodash": "^4.14.191",
+    "@types/rsvp": "^4.0.4",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
+    "chokidar-cli": "^3.0.0",
     "coffeescript": "^2.7.0",
     "dotenv": "^16.0.2",
+    "esbuild": "^0.17.10",
     "mocha": "^10.0.0",
     "module-alias": "^2.2.2",
-    "npm-run-all": "^4.1.5"
+    "npm-run-all": "^4.1.5",
+    "typescript": "^4.9.5"
   }
 }
