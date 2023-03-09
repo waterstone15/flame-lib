@@ -281,6 +281,8 @@ class Adapter
         prevQ    = cloneDeep(Q)
         nextQ    = cloneDeep(Q)
         
+        count_totalQ = cloneDeep(Q)
+        count_restQ  = cloneDeep(Q)
 
         cursor = if (!!_opts.cursor?.value) then _opts.cursor.value else null
         field  = if (!!_opts.sort?.field)   then _opts.sort?.field  else null
@@ -306,19 +308,22 @@ class Adapter
         if field && cursor
           cdoc = await @.db.collection(_collection).doc(cursor).get()
           
-          col_fstQ = [...col_fstQ, [ 'order-by', field, (if is_rev then 'desc' else 'asc') ]]
-          col_lstQ = [...col_lstQ, [ 'order-by', field, (if is_rev then 'asc' else 'desc') ]]
+          col_fstQ    = [...col_fstQ,    [ 'order-by', field, (if is_rev then 'desc' else 'asc') ]]
+          col_lstQ    = [...col_lstQ,    [ 'order-by', field, (if is_rev then 'asc' else 'desc') ]]
           
-          itemsQ   = [...itemsQ,   [ 'order-by', field, (if ((is_rev && !at_end) || (!is_rev && at_end)) then 'desc' else 'asc') ]]
-          itemsQ   = [...itemsQ,   [ 'start-at', cdoc ]]
+          count_restQ = [...count_restQ, [ 'order-by', field, (if ((is_rev && !at_end) || (!is_rev && at_end)) then 'desc' else 'asc') ]]
+          count_restQ = [...count_restQ, [ 'start-at', cdoc ]]
+
+          itemsQ      = [...itemsQ,      [ 'order-by', field, (if ((is_rev && !at_end) || (!is_rev && at_end)) then 'desc' else 'asc') ]]
+          itemsQ      = [...itemsQ,      [ 'start-at', cdoc ]]
           
-          (nextQ   = [...nextQ,    [ 'order-by', field, 'asc'  ]]) if (!is_rev && at_end)
-          (nextQ   = [...nextQ,    [ 'order-by', field, 'desc' ]]) if (is_rev && at_end)
-          (nextQ   = [...nextQ,    [ 'start-after', cdoc ]]) if (at_end)
+          (nextQ      = [...nextQ,       [ 'order-by', field, 'asc'  ]]) if (!is_rev && at_end)
+          (nextQ      = [...nextQ,       [ 'order-by', field, 'desc' ]]) if (is_rev && at_end)
+          (nextQ      = [...nextQ,       [ 'start-after', cdoc ]]) if (at_end)
           
-          (prevQ   = [...prevQ,    [ 'order-by', field, 'desc' ]]) if (!is_rev && !at_end) 
-          (prevQ   = [...prevQ,    [ 'order-by', field, 'asc'  ]]) if (is_rev && !at_end)
-          (prevQ   = [...prevQ,    [ 'start-after', cdoc ]]) if (!at_end)
+          (prevQ      = [...prevQ,       [ 'order-by', field, 'desc' ]]) if (!is_rev && !at_end) 
+          (prevQ      = [...prevQ,       [ 'order-by', field, 'asc'  ]]) if (is_rev && !at_end)
+          (prevQ      = [...prevQ,       [ 'start-after', cdoc ]]) if (!at_end)
 
         
 
@@ -326,18 +331,22 @@ class Adapter
         size   = if (isInteger(_opts.size) && _opts.size > 0) then _opts.size else 1
 
         if !isEmpty(fields)
-          col_fstQ = [...col_fstQ, [ 'select', ...fields ]] 
-          col_lstQ = [...col_lstQ, [ 'select', ...fields ]] 
-          itemsQ   = [...itemsQ,   [ 'select', ...fields ]] 
-          nextQ    = [...nextQ,    [ 'select', ...fields ]] 
-          prevQ    = [...prevQ,    [ 'select', ...fields ]] 
+          itemsQ = [...itemsQ,   [ 'select', ...fields ]] 
+        
+        col_fstQ    = [...col_fstQ,    [ 'select', [] ]] 
+        col_lstQ    = [...col_lstQ,    [ 'select', [] ]] 
+        count_restQ = [...count_restQ, [ 'select', [] ]] 
+        nextQ       = [...nextQ,       [ 'select', [] ]] 
+        prevQ       = [...prevQ,       [ 'select', [] ]] 
 
         itemsQ = [...itemsQ, [ 'limit', (size + 1) ]]
 
 
-        [ col_first, col_last, items, next, prev ] = await all([
+        [ col_first, col_last, count_rest, count_total, items, next, prev ] = await all([
           @.find(_collection, col_fstQ, _shape, fields).read()
           @.find(_collection, col_lstQ, _shape, fields).read()
+          @.count(_collection, count_restQ, _shape).read()
+          @.count(_collection, count_totalQ, _shape).read()
           @.list(_collection, itemsQ, _shape).read()
           @.find(_collection, nextQ, _shape, fields).read()
           @.find(_collection, prevQ, _shape, fields).read()
@@ -361,10 +370,19 @@ class Adapter
             null
         
 
+        counts = {}
+        counts.total = count_total
+        counts.page = (take items, size).length
+        counts.before = if at_end then (count_rest - counts.page) else (counts.total - count_rest)
+        counts.after = if at_end then (counts.total - count_rest) else (count_rest - counts.page)
+        counts.rest = count_rest
+
         (items = reverse(items)) if at_end
         items = take(items, size)
 
+
         return {
+          counts: counts
           collection:
             first: col_first
             last:  col_last
