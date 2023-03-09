@@ -1,6 +1,6 @@
 {
   "name": "flame-lib",
-  "version": "5.5.0",
+  "version": "5.6.0",
   "description": "A data model and query library for Firestore.",
   "main": "./lib/flame-lib.js",
   "repository": "git@github.com:waterstone15/flame-lib.git",
