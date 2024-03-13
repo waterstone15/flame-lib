@@ -9,6 +9,17 @@
   "engines": {
     "yarn": "1"
   },
+  "keywords": [
+    "data",
+    "database",
+    "firebase",
+    "firestore",
+    "model",
+    "odm",
+    "orm",
+    "query",
+    "validation"
+  ],
   "exports": {
     ".": {
       "import": "./lib/flame-lib.js",
